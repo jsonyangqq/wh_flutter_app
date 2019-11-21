@@ -1,0 +1,43 @@
+import 'package:flutter/material.dart';
+import 'package:wh_flutter_app/pages/AppendService.dart';
+import 'package:wh_flutter_app/pages/ChargeBackApply.dart';
+import 'package:wh_flutter_app/pages/ComfirmService.dart';
+import 'package:wh_flutter_app/pages/Payment.dart';
+import 'package:wh_flutter_app/pages/UnComfirmService.dart';
+import 'package:wh_flutter_app/pages/tabs/Home.dart';
+import 'package:wh_flutter_app/pages/tabs/Service.dart';
+import '../Login.dart';
+import '../pages/Tabs.dart';
+
+//配置路由
+final routes={
+      '/login':(context)=>LoginPage(),
+      '/':(context)=>Tabs(),
+      '/service':(context)=>ServicePage(),
+      '/home':(context)=>HomePage(),
+      '/chargeBackApply':(context)=>ChargeBackApplyPage(),
+      '/appendService':(context,{arguments})=>AppendServicePage(arguments: arguments),
+      '/comfirmService':(context)=>ComfirmServicePage(),
+      '/unComfirmService':(context)=>UnComfirmServicePage(),
+      '/payment':(context)=>PaymentPage(),
+};
+//固定写法
+// ignore: top_level_function_literal_block
+var onGenerateRoute=(RouteSettings settings) {
+      // 统一处理
+      final String name = settings.name; 
+      final Function pageContentBuilder = routes[name];
+      if (pageContentBuilder != null) {
+        if (settings.arguments != null) {
+          final Route route = MaterialPageRoute(
+              builder: (context) =>
+                  pageContentBuilder(context, arguments: settings.arguments));
+          return route;
+        }else{
+            final Route route = MaterialPageRoute(
+              builder: (context) =>
+                  pageContentBuilder(context));
+            return route;
+        }
+      }
+};
