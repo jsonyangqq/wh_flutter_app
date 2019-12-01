@@ -333,10 +333,14 @@ class _ServicePageState extends State<ServicePage> {
                                           ),
                                           recognizer: TapGestureRecognizer()
                                             ..onTap = () {
-                                              if(workOrderPondModel.orderItemDtoList.length != 0) {
-                                                print("点击了删除订单项编号为${workOrderPondModel.orderItemDtoList}");
-                                                DialogPage.alertDialog(
-                                                    context, this.serviceName);
+                                              if(workOrderPondModel.visibleComplete == false){
+                                                if(workOrderPondModel.orderItemDtoList.length != 0) {
+                                                  print("点击了删除订单项编号为${workOrderPondModel.orderItemDtoList}");
+                                                  var alertDialog = DialogPage.alertDialog(
+                                                      context, this.serviceName);
+                                                }
+                                              }else {
+
                                               }
                                             }
                                       )

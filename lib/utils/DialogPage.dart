@@ -3,7 +3,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 
 class DialogPage{
 
-  static alertDialog (BuildContext context,String serviceName)async{
+  static dynamic alertDialog (BuildContext context,String serviceName)async{
 
     var result = await showDialog(
         barrierDismissible: false,//表示点击灰色背景时弹窗是否消失
@@ -33,7 +33,7 @@ class DialogPage{
           );
         }
     );
-    print("result = "+result);
+    return result;
 
   }
   static simpleDialog(BuildContext context) async{
