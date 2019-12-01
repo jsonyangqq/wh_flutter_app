@@ -7,24 +7,28 @@ class TextClickView extends StatefulWidget {
 
   String title;
   Color color;
+  TextStyle style;
   VoidCallback rightClick;
 
 
-  TextClickView({this.title,this.color,this.rightClick});
+  TextClickView({this.title,this.color,this.style,this.rightClick});
 
   @override
-  _TextClickViewState createState() => _TextClickViewState(this.title,this.color,this.rightClick);
+  _TextClickViewState createState() => _TextClickViewState(this.title,this.color,this.style,this.rightClick);
+
 }
 
 class _TextClickViewState extends State<TextClickView> {
   String title;
   Color color;
+  TextStyle style;
   VoidCallback rightClick;
 
 
-  _TextClickViewState(title, color, rightClick){
+  _TextClickViewState(title, color, style, rightClick){
       this.title = title;
       this.color = color;
+      this.style = style;
       this.rightClick = rightClick;
   }
 

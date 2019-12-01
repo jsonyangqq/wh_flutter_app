@@ -84,7 +84,7 @@ class _ChargeBackApplyPageState extends State<ChargeBackApplyPage> {
     if(this._image == null){
       return Text('请选择图片...');
     }
-      return Image.file(this._image);
+      return Image.file(this._image,fit: BoxFit.fill,);
   }
 
   @override
@@ -334,11 +334,14 @@ class _ChargeBackApplyPageState extends State<ChargeBackApplyPage> {
                     ScreenAdapter.height(8),
                     ScreenAdapter.width(16),
                     ScreenAdapter.height(8)),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    _buildImage()
-                  ],
+                child: Container(
+                  alignment: Alignment.topLeft,
+                  child: Wrap(
+                    children: <Widget>[
+                      _buildImage(),
+                      _buildImage(),
+                    ],
+                  ),
                 ),
               )
             ],

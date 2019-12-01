@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:jaguar/jaguar.dart';
 import 'package:wh_flutter_app/routes/jaguar_flutter_asset.dart';
-import 'package:fluwx/fluwx.dart' as fluwx;
-
 import 'routes/Routes.dart';
 
 //void main() => runApp(MyApp());
@@ -27,14 +25,14 @@ class MyApp extends StatefulWidget  {
 
 class _MyAppState extends State<MyApp> {
 
-  @override
-  void initState() {
-    super.initState();
-    _initFluwx();
-  }
+//  @override
+//  void initState() {
+//    super.initState();
+//    _initFluwx();
+//  }
 
   // Platform messages are asynchronous, so we initialize in an async method.
-  Future<void> initPlatformState() async {}
+//  Future<void> initPlatformState() async {}
 
   // This widget is the root of your application.
   @override
@@ -46,15 +44,15 @@ class _MyAppState extends State<MyApp> {
     );
   }
 
-  _initFluwx() async {
-    await fluwx.registerWxApi(
-        appId: "wxe3651df7028fcd16",
-        doOnAndroid: true,
-        doOnIOS: true,
-        universalLink: "https://your.univerallink.com/link/");
-    var result = await fluwx.isWeChatInstalled();
-    print("is installed $result");
-  }
+//  _initFluwx() async {
+//    await fluwx.registerWxApi(
+//        appId: "wxe3651df7028fcd16",
+//        doOnAndroid: true,
+//        doOnIOS: true,
+//        universalLink: "https://your.univerallink.com/link/");
+//    var result = await fluwx.isWeChatInstalled();
+//    print("is installed $result");
+//  }
 
 }
 

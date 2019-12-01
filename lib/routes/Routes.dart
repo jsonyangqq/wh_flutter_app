@@ -4,6 +4,7 @@ import 'package:wh_flutter_app/pages/ChargeBackApply.dart';
 import 'package:wh_flutter_app/pages/ComfirmService.dart';
 import 'package:wh_flutter_app/pages/Payment.dart';
 import 'package:wh_flutter_app/pages/UnComfirmService.dart';
+import 'package:wh_flutter_app/pages/WorkOrderList.dart';
 import 'package:wh_flutter_app/pages/tabs/Home.dart';
 import 'package:wh_flutter_app/pages/tabs/Service.dart';
 import '../Login.dart';
@@ -15,6 +16,7 @@ final routes={
       '/':(context)=>Tabs(),
       '/service':(context)=>ServicePage(),
       '/home':(context)=>HomePage(),
+      '/workOrderList':(context)=>WorkOrderListPage(),
       '/chargeBackApply':(context)=>ChargeBackApplyPage(),
       '/appendService':(context,{arguments})=>AppendServicePage(arguments: arguments),
       '/comfirmService':(context)=>ComfirmServicePage(),
