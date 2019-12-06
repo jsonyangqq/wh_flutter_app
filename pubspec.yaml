@@ -35,8 +35,9 @@ dependencies:
   date_format: ^1.0.8
 
 dev_dependencies:
-  flutter_test:
-    sdk: flutter
+  # flutter_test:
+  #   sdk: flutter
+   build_runner: any
 
 
 # For information on the generic Dart part of this file, see the
