@@ -486,7 +486,8 @@ class _HomePageState extends State<HomePage> {
                                   // 边界半径（`borderRadius`）属性，圆角的边界半径。
                                   borderRadius: BorderRadius.all(Radius.circular(ScreenAdapter.width(16.0))),
                                   child: LinearProgressIndicator(
-                                    value: (this._remunerationData.accumulateRemunerateTarget/100),
+                                    // value: (this._remunerationData.accumulateRemunerateTarget/100),
+                                    value: 0,
                                     backgroundColor: Color(0xffffff),
                                     valueColor: AlwaysStoppedAnimation<Color>(Colors.blue),
                                   ),
@@ -523,7 +524,8 @@ class _HomePageState extends State<HomePage> {
                                   // 边界半径（`borderRadius`）属性，圆角的边界半径。
                                   borderRadius: BorderRadius.all(Radius.circular(ScreenAdapter.width(16.0))),
                                   child: LinearProgressIndicator(
-                                    value: (this._remunerationData.accumulateWorkOrderTarget/100),
+                                    // value: (this._remunerationData.accumulateWorkOrderTarget/100),
+                                    value: 0,
                                     backgroundColor: Color(0xffffff),
                                     valueColor: AlwaysStoppedAnimation<Color>(Colors.blue),
                                   ),
