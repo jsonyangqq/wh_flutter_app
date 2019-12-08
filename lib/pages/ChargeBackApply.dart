@@ -1,13 +1,22 @@
 import 'dart:io';
 
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:wh_flutter_app/config/Config.dart';
 import 'package:wh_flutter_app/utils/DashedRect.dart';
+import 'package:wh_flutter_app/utils/DialogPage.dart';
 import 'package:wh_flutter_app/utils/ScreenAdapter.dart';
 
 /*进入退单申请中心页面*/
 
 class ChargeBackApplyPage extends StatefulWidget {
+
+  Map arguments;
+
+  ChargeBackApplyPage({Key key, this.arguments}) : super(key: key);
+
   @override
   _ChargeBackApplyPageState createState() => _ChargeBackApplyPageState();
 }
@@ -15,24 +24,69 @@ class ChargeBackApplyPage extends StatefulWidget {
 class _ChargeBackApplyPageState extends State<ChargeBackApplyPage> {
 
   File _image;
-  bool btnFlag = true;
-  Color backgroundColor;
-  Color textColor;
-  Color backgroundColor2;
-  Color textColo2;
-  Color backgroundColor3;
-  Color textColor3;
+  int workOrderId;
+  int decorationId;
+  List abilityTagList;
+  String imageUrlAddress;
+  String descrptionReason;
 
   @override
   void initState() {
     super.initState();
-    backgroundColor = Color.fromRGBO(242, 242, 242, 1);
-    textColor = Color.fromRGBO(102, 102, 102, 1);
-    backgroundColor2 = Color.fromRGBO(242, 242, 242, 1);
-    textColo2 = Color.fromRGBO(102, 102, 102, 1);
-    backgroundColor3 = Color.fromRGBO(242, 242, 242, 1);
-    textColor3 = Color.fromRGBO(102, 102, 102, 1);
+    _getExistWOrderList();
+    //获取其它页面传递过来的数据
+    this.workOrderId =widget.arguments['workOrderId'];
+    this.decorationId =widget.arguments['decorationId'];
   }
+
+  ///获取师傅退单泡泡
+  _getExistWOrderList() async {
+    var api = Config.domain + "/mobile/workOrderService/getChargeBackBubbleData?type=7";
+    var response = await Dio().post(api);
+    if(response.data['ret']==true){
+      setState(() {
+        this.abilityTagList = response.data['data'];
+      });
+    }
+  }
+
+  List<Widget> _fillWidgetBubble() {
+    List<Widget> list = new List();
+    if(this.abilityTagList!=null){
+      this.abilityTagList.asMap().forEach((index,value){
+        list.add(
+            RaisedButton(
+              color: value['backgroundColor'] == null ? Color.fromRGBO(242, 242, 242, 1) : value['backgroundColor'],
+              textColor: value['textColor'] == null ? Color.fromRGBO(102, 102, 102, 1) : value['textColor'],
+              shape: RoundedRectangleBorder(
+                  borderRadius:
+                  BorderRadius.circular(ScreenAdapter.width(20.0))),
+              child: Text(
+                "${value['name']}",
+                style: TextStyle(fontSize: ScreenAdapter.size(20.0)),
+              ),
+              onPressed: () {
+                if(value["flag"] == false){
+                  setState(() {
+                    this.abilityTagList[index]['flag'] = true;
+                    this.abilityTagList[index]['backgroundColor'] = Colors.lightBlue;
+                    this.abilityTagList[index]['textColor'] = Colors.white;
+                  });
+                }else {
+                  setState(() {
+                    this.abilityTagList[index]['flag'] = false;
+                    this.abilityTagList[index]['backgroundColor'] = Color.fromRGBO(242, 242, 242, 1);
+                    this.abilityTagList[index]['textColor'] = Color.fromRGBO(102, 102, 102, 1);
+                  });
+                }
+              },
+            )
+        );
+      });
+    }
+    return list;
+  }
+
 
   _modelBottomSheet() async{
 
@@ -51,7 +105,7 @@ class _ChargeBackApplyPageState extends State<ChargeBackApplyPage> {
                 Divider(),
                 ListTile(
                   title: Text("相册"),
-                  onTap: _openGellery
+                  onTap: _openGallery
                 ),
               ],
             ),
@@ -62,17 +116,22 @@ class _ChargeBackApplyPageState extends State<ChargeBackApplyPage> {
   }
 
   /*拍照*/
-  _takePhoto() async{
-    File image = await ImagePicker.pickImage(source: ImageSource.camera,maxWidth: ScreenAdapter.width(180),maxHeight: ScreenAdapter.height(180));
+  _takePhoto() async {
+    var image = await ImagePicker.pickImage(source: ImageSource.camera, maxWidth: 400);
+
     setState(() {
       this._image = image;
     });
+
     Navigator.pop(context);
+
   }
 
   /*相册*/
-  _openGellery() async{
-    File image = await ImagePicker.pickImage(source: ImageSource.gallery,maxWidth: ScreenAdapter.width(180),maxHeight: ScreenAdapter.height(180));
+  _openGallery() async {
+    var image =
+    await ImagePicker.pickImage(source: ImageSource.gallery, maxWidth: 400);
+
     setState(() {
       this._image = image;
     });
@@ -86,6 +145,54 @@ class _ChargeBackApplyPageState extends State<ChargeBackApplyPage> {
     }
       return Image.file(this._image,fit: BoxFit.fill,);
   }
+
+  //上传图片到服务器
+  _uploadImage(File _imageDir) async {
+
+    //注意：dio3.x版本为了兼容web做了一些修改，上传图片的时候需要把File类型转换成String类型，具体代码如下
+    if(_imageDir == null){
+      Fluttertoast.showToast(
+        msg: '请先上传图片',
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.CENTER,
+      );
+      return;
+    }
+    var fileDir=_imageDir.path;
+    setState(() {
+      this.imageUrlAddress = fileDir;
+    });
+    var fileName = fileDir.substring(fileDir.lastIndexOf("/")+1);
+    String abilityStr = "";
+    this.abilityTagList.asMap().forEach((index,abilityTag){
+      if(index != this.abilityTagList.length-1 && abilityTag["flag"] == true){
+        abilityStr +=abilityTag["name"]+"##;";
+      }
+    });
+    FormData formData = FormData.fromMap({
+      "workOrderId": this.workOrderId,
+      "decorationId": this.decorationId,
+      "chargebackType": "0",
+      "description": abilityStr+this.descrptionReason,
+      "file":  await MultipartFile.fromFile(fileDir, filename: fileName)
+    });
+    var api = Config.domain + "/mobile/workOrderService/getUnableCompleteChgBack";
+    var response = await Dio().post(api, data: formData);
+    print(response);
+    if(response.data['ret']==true){
+      String msg = '退单服务已申请成功';
+      String msg2 = "";
+      DialogPage.comfirmDialog(
+          context, msg,msg2);
+    }else {
+      Fluttertoast.showToast(
+        msg: '${response.data["msg"]}',
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.CENTER,
+      );
+    }
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -138,6 +245,7 @@ class _ChargeBackApplyPageState extends State<ChargeBackApplyPage> {
                             borderRadius: BorderRadius.circular(20)),
                         onPressed: () {
                           print("对应退单表单提交！");
+                          this._uploadImage(this._image);
                         },
                       ),
                     ),
@@ -149,80 +257,7 @@ class _ChargeBackApplyPageState extends State<ChargeBackApplyPage> {
                 spacing: ScreenAdapter.width(60.0),
                 runSpacing: ScreenAdapter.height(10),
                 alignment: WrapAlignment.spaceEvenly,
-                children: <Widget>[
-                  RaisedButton(
-                    color: backgroundColor,
-                    textColor: textColor,
-                    shape: RoundedRectangleBorder(
-                        borderRadius:
-                        BorderRadius.circular(ScreenAdapter.width(20.0))),
-                    child: Text(
-                      '第一集',
-                      style: TextStyle(fontSize: ScreenAdapter.size(20.0)),
-                    ),
-                    onPressed: () {
-                      print('点击上去，按钮变颜色变成选中');
-                      /*点击的时候如果没有选中，则让其选中*/
-                      if (backgroundColor == Color.fromRGBO(242, 242, 242, 1)) {
-                        setState(() {
-                          backgroundColor = Colors.lightBlue;
-                          textColor = Colors.white;
-                        });
-                      } else {
-                        setState(() {
-                          backgroundColor = Color.fromRGBO(242, 242, 242, 1);
-                          textColor = Color.fromRGBO(102, 102, 102, 1);
-                        });
-                      }
-                    },
-                  ),
-                  RaisedButton(
-                    color: backgroundColor2,
-                    textColor: textColo2,
-                    shape: RoundedRectangleBorder(
-                        borderRadius:
-                        BorderRadius.circular(ScreenAdapter.width(20.0))),
-                    child: Text('第一集ssssssssss', style: TextStyle(fontSize: ScreenAdapter.size(20.0)),),
-                    onPressed: () {
-                      print('点击上去，按钮变颜色变成选中');
-                      /*点击的时候如果没有选中，则让其选中*/
-                      if (backgroundColor2 == Color.fromRGBO(242, 242, 242, 1)) {
-                        setState(() {
-                          backgroundColor2 = Colors.lightBlue;
-                          textColo2 = Colors.white;
-                        });
-                      } else {
-                        setState(() {
-                          backgroundColor2 = Color.fromRGBO(242, 242, 242, 1);
-                          textColo2 = Color.fromRGBO(102, 102, 102, 1);
-                        });
-                      }
-                    },
-                  ),
-                  RaisedButton(
-                    color: backgroundColor3,
-                    textColor: textColor3,
-                    shape: RoundedRectangleBorder(
-                        borderRadius:
-                        BorderRadius.circular(ScreenAdapter.width(20.0))),
-                    child: Text('第一集ssss', style: TextStyle(fontSize: ScreenAdapter.size(20.0)),),
-                    onPressed: () {
-                      print('点击上去，按钮变颜色变成选中');
-                      /*点击的时候如果没有选中，则让其选中*/
-                      if (backgroundColor3 == Color.fromRGBO(242, 242, 242, 1)) {
-                        setState(() {
-                          backgroundColor3 = Colors.lightBlue;
-                          textColor3 = Colors.white;
-                        });
-                      } else {
-                        setState(() {
-                          backgroundColor3 = Color.fromRGBO(242, 242, 242, 1);
-                          textColor3 = Color.fromRGBO(102, 102, 102, 1);
-                        });
-                      }
-                    },
-                  ),
-                ],
+                children: _fillWidgetBubble(),
               ),
               Padding(
                 padding: EdgeInsets.fromLTRB(
@@ -338,8 +373,7 @@ class _ChargeBackApplyPageState extends State<ChargeBackApplyPage> {
                   alignment: Alignment.topLeft,
                   child: Wrap(
                     children: <Widget>[
-                      _buildImage(),
-                      _buildImage(),
+                      _buildImage()
                     ],
                   ),
                 ),

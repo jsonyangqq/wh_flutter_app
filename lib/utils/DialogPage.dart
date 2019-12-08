@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:wh_flutter_app/pages/Tabs.dart';
+
+import 'ScreenAdapter.dart';
 
 class DialogPage{
 
@@ -12,7 +15,7 @@ class DialogPage{
           return AlertDialog(
             backgroundColor: Color.fromRGBO(243, 246, 253, 1),
             title: Text("提示信息"),
-            content: Text("确定要删除【我的工单宽带整装】吗"),
+            content: Text("确定要删除【${serviceName}】吗"),
             actions: <Widget>[
               //定义浮动按钮
               FlatButton(
@@ -36,6 +39,39 @@ class DialogPage{
     return result;
 
   }
+
+  static dynamic comfirmDialog (BuildContext context,String hintInfo,String hintInfoTwo)async{
+    var result = await showDialog(
+        barrierDismissible: false,//表示点击灰色背景时弹窗是否消失
+        context: context,
+        builder: (context){
+          return AlertDialog(
+            backgroundColor: Color.fromRGBO(243, 246, 253, 1),
+            title: Text("提示信息",style: TextStyle(color: Colors.blue)),
+            content: Container(child: Text('${hintInfo} \n ${hintInfoTwo}',textAlign: TextAlign.center,
+              style: TextStyle(fontSize: ScreenAdapter.size(36),fontFamily: "微软雅黑"),)),
+            actions: <Widget>[
+              FlatButton(
+                child: Text("确定"),
+                onPressed: (){
+                  print("确定");
+                  Navigator.pop(context,"OK");
+                  ///动态传递参数
+                  Navigator.push(context, new MaterialPageRoute(
+                    builder: (context) =>
+                      new Tabs(index: 0)
+                  ));
+                },
+              ),
+            ],
+          );
+        }
+    );
+    return result;
+
+  }
+
+
   static simpleDialog(BuildContext context) async{
 
     var result=await showDialog(

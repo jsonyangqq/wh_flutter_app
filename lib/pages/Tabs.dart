@@ -14,7 +14,7 @@ class Tabs extends StatefulWidget {
 
 class _TabsState extends State<Tabs> {
 
-  int _currentIndex;
+  int   _currentIndex;
   _TabsState(index){
     this._currentIndex=index;
   }

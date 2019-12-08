@@ -17,10 +17,10 @@ final routes={
       '/service':(context)=>ServicePage(),
       '/home':(context)=>HomePage(),
       '/workOrderList':(context)=>WorkOrderListPage(),
-      '/chargeBackApply':(context)=>ChargeBackApplyPage(),
+      '/chargeBackApply':(context,{arguments})=>ChargeBackApplyPage(arguments: arguments),
       '/appendService':(context,{arguments})=>AppendServicePage(arguments: arguments),
-      '/comfirmService':(context)=>ComfirmServicePage(),
-      '/unComfirmService':(context)=>UnComfirmServicePage(),
+      '/comfirmService':(context,{arguments})=>ComfirmServicePage(arguments: arguments),
+      '/unComfirmService':(context,{arguments})=>UnComfirmServicePage(arguments: arguments),
       '/payment':(context)=>PaymentPage(),
 };
 //固定写法

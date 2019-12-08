@@ -1,6 +1,7 @@
 
 class WorkOrderPondModel {
   int workOrderId;
+  String orderId;
   int decorationId;
   int orderItemId;
   String serviceName;
@@ -20,6 +21,7 @@ class WorkOrderPondModel {
 
   WorkOrderPondModel(
       {this.workOrderId,
+        this.orderId,
         this.decorationId,
         this.orderItemId,
         this.serviceName,
@@ -40,6 +42,7 @@ class WorkOrderPondModel {
 
   WorkOrderPondModel.fromJson(Map<String, dynamic> json) {
     workOrderId = json['workOrderId'];
+    orderId = json['orderId'];
     decorationId = json['decorationId'];
     orderItemId = json['orderItemId'];
     serviceName = json['serviceName'];
@@ -66,6 +69,7 @@ class WorkOrderPondModel {
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
     data['workOrderId'] = this.workOrderId;
+    data['orderId'] = this.orderId;
     data['decorationId'] = this.decorationId;
     data['orderItemId'] = this.orderItemId;
     data['serviceName'] = this.serviceName;

@@ -23,6 +23,7 @@ class _WorkOrderListPageState extends State<WorkOrderListPage> {
         length: 2,
         child: Scaffold(
             appBar: AppBar(
+                automaticallyImplyLeading: false, //去掉头部返回按钮
                 elevation: 0, //去掉导航栏下方阴影效果
                 backgroundColor: Color.fromRGBO(241, 243, 244, 0),
                 brightness: Brightness.light,
@@ -39,7 +40,7 @@ class _WorkOrderListPageState extends State<WorkOrderListPage> {
                         unselectedLabelColor: Colors.black,
                         //让指示器大小和tab等宽
                         indicatorSize: TabBarIndicatorSize.tab,
-                        tabs: <Widget>[Tab(text: '工单池'), Tab(text: '我的工单')],
+                        tabs: <Widget>[Tab(text: '已完工'), Tab(text: '未完工')],
                       ),
                     )
                   ],

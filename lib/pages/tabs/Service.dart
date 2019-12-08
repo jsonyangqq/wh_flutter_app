@@ -21,9 +21,9 @@ class ServicePage extends StatefulWidget {
 class _ServicePageState extends State<ServicePage> {
 
   bool flag = true;
-  String serviceName = "服务名称";
   Map<String,dynamic> userInfo = Map();
   List<dynamic> _workOrderPondDataList = new List<dynamic>();
+  int currentIndex = 0;
 
   @override
   void initState() {
@@ -254,9 +254,9 @@ class _ServicePageState extends State<ServicePage> {
   ///-------------------- 左右切换栏 数据分隔 ------------------------------
 
   ///遍历我的工单池数据
-  List<Widget> _myRecWorkOrderListWidget() {
+  List<Widget> _myRecWorkOrderListWidget(){
     List<Widget> list = new List();
-    this._workOrderPondDataList.map((value) {
+    this._workOrderPondDataList.asMap().forEach((index,value) {
       WorkOrderPondModel workOrderPondModel = WorkOrderPondModel.fromJson(value);
       if (workOrderPondModel.decorationId != null && workOrderPondModel.isComplete == "2") {
         list.add(
@@ -333,14 +333,22 @@ class _ServicePageState extends State<ServicePage> {
                                           ),
                                           recognizer: TapGestureRecognizer()
                                             ..onTap = () {
+//                                            print(this._workOrderPondDataList);
                                               if(workOrderPondModel.visibleComplete == false){
-                                                if(workOrderPondModel.orderItemDtoList.length != 0) {
-                                                  print("点击了删除订单项编号为${workOrderPondModel.orderItemDtoList}");
-                                                  var alertDialog = DialogPage.alertDialog(
-                                                      context, this.serviceName);
+                                                if(this._workOrderPondDataList[index]['orderItemDtoList'].length >1) {
+                                                  DialogPage.alertDialog(
+                                                      context, value['serviceName']).then((info){
+                                                    if(info == "OK"){
+                                                      _loadDeleteUsWOrderExeu(value['orderItemId']);
+                                                    }
+                                                  });
                                                 }
                                               }else {
-
+                                                Fluttertoast.showToast(
+                                                  msg: '修改工单信息需要确认上门经用户同意方能修改',
+                                                  toastLength: Toast.LENGTH_SHORT,
+                                                  gravity: ToastGravity.CENTER,
+                                                );
                                               }
                                             }
                                       )
@@ -350,7 +358,7 @@ class _ServicePageState extends State<ServicePage> {
                         ),
                       ),
                       Column(
-                        children: _getmyOtherWorkOrderDetailsInfo(workOrderPondModel.orderItemDtoList, workOrderPondModel.description)
+                        children: _getmyOtherWorkOrderDetailsInfo(workOrderPondModel.orderItemDtoList, workOrderPondModel.description, workOrderPondModel.visibleComplete)
                       ),
                       Column(
                         children: <Widget>[
@@ -425,7 +433,11 @@ class _ServicePageState extends State<ServicePage> {
                                           size: ScreenAdapter.size(30),),
                                         onPressed: () {
                                           Navigator.pushNamed(
-                                              context, '/appendService');
+                                              context, '/appendService',arguments: {
+                                            "workOrderId":workOrderPondModel.workOrderId,
+                                            "orderId":workOrderPondModel.orderId,
+                                            "decorationId":userInfo["decorationId"]
+                                          });
                                         },
                                       ),
                                     ),
@@ -438,7 +450,11 @@ class _ServicePageState extends State<ServicePage> {
                                       ),
                                       rightClick: (){
                                         Navigator.pushNamed(
-                                            context, '/appendService');
+                                            context, '/appendService',arguments: {
+                                          "workOrderId":workOrderPondModel.workOrderId,
+                                          "orderId":workOrderPondModel.orderId,
+                                          "decorationId":userInfo["decorationId"]
+                                        });
                                       },
                                     )
                                   ],
@@ -472,7 +488,10 @@ class _ServicePageState extends State<ServicePage> {
                                   onPressed: () {
                                     print("跳转到退单页面");
                                     Navigator.pushNamed(
-                                        context, '/chargeBackApply');
+                                        context, '/chargeBackApply',arguments: {
+                                      "workOrderId":workOrderPondModel.workOrderId,
+                                      "decorationId":this.userInfo["decorationId"]
+                                    });
                                   },
                                 )
                               ],
@@ -494,7 +513,9 @@ class _ServicePageState extends State<ServicePage> {
                                   onPressed: () {
                                     print("已完成");
                                     Navigator.pushNamed(
-                                        context, '/comfirmService');
+                                        context, '/comfirmService',arguments: {
+                                        "workOrderId":workOrderPondModel.workOrderId
+                                    });
                                   },
                                 ),
                                 RaisedButton(
@@ -506,7 +527,10 @@ class _ServicePageState extends State<ServicePage> {
                                   onPressed: () {
                                     print("退单");
                                     Navigator.pushNamed(
-                                        context, '/unComfirmService');
+                                        context, '/unComfirmService',arguments: {
+                                      "workOrderId":workOrderPondModel.workOrderId,
+                                      "decorationId":this.userInfo["decorationId"]
+                                    });
                                   },
                                 )
                               ],
@@ -526,12 +550,12 @@ class _ServicePageState extends State<ServicePage> {
           ),
         );
       }
-    }).toList();
+    });
     return list;
   }
 
   ///获取我的工单池其它服务信息
-  List<Widget> _getmyOtherWorkOrderDetailsInfo(List<OrderItemDtoList> orderItemDtoList, String description) {
+  List<Widget> _getmyOtherWorkOrderDetailsInfo(List<OrderItemDtoList> orderItemDtoList, String description, bool visibleComplete) {
     List<Widget> list = new List();
     orderItemDtoList.asMap().forEach((index,value){
       if(index>0){
@@ -608,10 +632,21 @@ class _ServicePageState extends State<ServicePage> {
                                 ),
                                 recognizer: TapGestureRecognizer()
                                   ..onTap = () {
-                                    if(orderItemDtoList.length != 0) {
-                                      print("点击了删除订单项编号为${orderItemDtoList}");
-                                      DialogPage.alertDialog(
-                                          context, this.serviceName);
+                                    if(visibleComplete == false){
+                                      if(orderItemDtoList.length >1) {
+                                          DialogPage.alertDialog(
+                                            context, value.serviceName).then((info){
+                                            if(info == "OK"){
+                                              _loadDeleteUsWOrderExeu(value.orderItemId);
+                                            }
+                                        });
+                                      }
+                                    }else {
+                                      Fluttertoast.showToast(
+                                        msg: '修改工单信息需要确认上门经用户同意方能修改',
+                                        toastLength: Toast.LENGTH_SHORT,
+                                        gravity: ToastGravity.CENTER,
+                                      );
                                     }
                                   }
                             )
@@ -690,6 +725,7 @@ class _ServicePageState extends State<ServicePage> {
           this._workOrderPondDataList[index]["visibleHomeEntry"] = true;
           this._workOrderPondDataList[index]["visibleComplete"] = false;
         });
+        _getWorkOrderPoneData();
       }else if(response.data["data"]==0){
         Fluttertoast.showToast(
           msg: '此单可能被客户经理重新操作，请联系客户经理进行确认',
@@ -705,6 +741,46 @@ class _ServicePageState extends State<ServicePage> {
         gravity: ToastGravity.CENTER,
       );
     }
+  }
+
+  //执行删除后更新操作
+  Future _loadDeleteUsWOrderExeu(int orderItemId) async {
+    _updateWorkOrderItemInfo(orderItemId).then((response){
+      if(response.data['ret']==true){
+        if(response.data["data"]==1){
+          Fluttertoast.showToast(
+            msg: '删除工单信息订单项成功',
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.CENTER,
+          );
+          _getWorkOrderPoneData().then((info){
+
+          });
+        }else if(response.data["data"]==0){
+          Fluttertoast.showToast(
+            msg: '此工单可能被客户经理重新操作，请联系客户经理进行确认',
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.CENTER,
+          );
+          _getWorkOrderPoneData().then((info){
+//            _myRecWorkOrderListWidget();
+          });
+        }
+      }else {
+        Fluttertoast.showToast(
+          msg: '${response.data["msg"]}',
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.CENTER,
+        );
+      }
+    });
+  }
+
+  ///师傅确认入户后删除订单项
+  _updateWorkOrderItemInfo(int orderItemId) async {
+    var api = Config.domain + "/mobile/workOrderService/masterUpdateOrderItemInfo?orderItemId=$orderItemId";
+    var response = await Dio().post(api);
+    return response;
   }
 
 
@@ -732,6 +808,11 @@ class _ServicePageState extends State<ServicePage> {
                       //让指示器大小和tab等宽
                       indicatorSize: TabBarIndicatorSize.tab,
                       tabs: <Widget>[Tab(text: '工单池'), Tab(text: '我的工单')],
+                      onTap: (index){
+                        setState(() {
+                          this.currentIndex = index;
+                        });
+                      },
                     ),
                   )
                 ],

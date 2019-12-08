@@ -22,7 +22,8 @@ class _PaymentPageState extends State<PaymentPage> {
         children: <Widget>[
           Expanded(
             child: InAppWebView(
-              initialUrl: "http://127.0.0.1:9000/html/payment.html",
+//              initialUrl: "http://127.0.0.1:9000/html/payment.html",
+              initialUrl: "https://www.slashgo.cn/wx-slash-young/wechat/applet/orderGrabRob?userId=194697",
               onProgressChanged: (InAppWebViewController controller, int progress) {
                 if(progress/100>0.999) {
                   print("加载完成了");

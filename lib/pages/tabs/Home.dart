@@ -6,10 +6,13 @@ import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:wh_flutter_app/config/Config.dart';
 import 'package:wh_flutter_app/model/RemunerationModel.dart';
+import 'package:wh_flutter_app/pages/WorkOrderList.dart';
 import 'package:wh_flutter_app/services/DecorationUserServices.dart';
 import 'package:wh_flutter_app/utils/ScreenAdapter.dart';
 import 'package:wh_flutter_app/utils/Storage.dart';
 import 'package:wh_flutter_app/utils/TextClickView.dart';
+
+import '../Tabs.dart';
 
 class HomePage extends StatefulWidget {
   HomePage({Key key}) : super(key: key);
@@ -378,6 +381,8 @@ class _HomePageState extends State<HomePage> {
                             onTap: (){
                               print("跳转到工单列表页面");
                               Navigator.pushNamed(context, '/workOrderList');
+                              ///隐藏跳转页面后的返回按钮
+//                              Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => WorkOrderListPage()));
                             },
                           ),
                         ),
