@@ -1,19 +1,18 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:jaguar/jaguar.dart';
-import 'package:wh_flutter_app/routes/jaguar_flutter_asset.dart';
 import 'routes/Routes.dart';
 import 'package:jpush_flutter/jpush_flutter.dart';
+
+import 'utils/Storage.dart';
 
 //void main() => runApp(MyApp());
 
 main() async{
-  final server = Jaguar(address: "127.0.0.1",port: 9000);
-  server.addRoute(serveFlutterAssets());
-  await server.serve(logRequests: true);
-  server.log.onRecord.listen((r) => print(r));
-
-
+//  final server = Jaguar(address: "118.24.9.160",port: 22);
+//  server.addRoute(serveFlutterAssets());
+//  await server.serve(logRequests: true);
+//  server.log.onRecord.listen((r) => print(r));
   runApp(MyApp());
 }
 
@@ -27,10 +26,21 @@ class MyApp extends StatefulWidget  {
 
 class _MyAppState extends State<MyApp> {
 
+  Map<String,dynamic> userInfo = Map();
+
   @override
   void initState() {
     super.initState();
+    _getUserInfoData();
     initPlatformState();
+  }
+
+  ///获取用户数据
+  _getUserInfoData() async {
+    Map<String,dynamic> userInfo = json.decode(await Storage.getString("userInfo"));
+    setState(() {
+      this.userInfo = userInfo;
+    });
   }
 
   // Platform messages are asynchronous, so we initialize in an async method.
@@ -69,7 +79,7 @@ class _MyAppState extends State<MyApp> {
       debug: true,
     );
     //设置别名，指定用户推送
-    jpush.setAlias("6").then((map) {
+    jpush.setAlias(this.userInfo['decorationId']).then((map) {
       print("设置别名成功");
     });
     jpush.applyPushAuthority(
