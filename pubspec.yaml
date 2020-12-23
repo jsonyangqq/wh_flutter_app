@@ -31,14 +31,17 @@ dependencies:
   jaguar: ^2.2.1
   flutter_inappbrowser: ^2.0.2
   fluttertoast: ^3.1.0
-  fluwx: ^1.1.3
+  http: ^0.12.0+2
+  fluwx: ^1.2.0
   date_format: ^1.0.8
   jpush_flutter: ^0.1.0
+  webview_flutter: ^0.3.19+9
+  path_provider: ^0.5.0
 
 dev_dependencies:
-  # flutter_test:
-  #   sdk: flutter
-   build_runner: any
+   flutter_test:
+     sdk: flutter
+#  build_runner: any
 
 
 # For information on the generic Dart part of this file, see the
@@ -57,6 +60,16 @@ flutter:
     - images/u2361.png
     - images/u8634.png
     - images/dianxin.png
+    - images/xuqiu.png
+    - images/shouhou.png
+    - images/toushu.png
+    - images/1.png
+    - images/2.png
+    - images/3.png
+    - images/4.png
+    - images/5.png
+    - images/6.png
+    - images/7.png
     - images/2.0x/shili.png
     - images/3.0x/shili.png
     - images/4.0x/shili.png
@@ -72,18 +85,36 @@ flutter:
     - images/2.0x/dianxin.png
     - images/3.0x/dianxin.png
     - images/4.0x/dianxin.png
-    - assets/html/payment.html
-    - assets/html/complain.html
-    - assets/css/payment.css
-    - assets/css/complain.css
-    - assets/images/dianxin.png
-    - assets/images/dingbuback_u188.png
-    - assets/images/u5213.png
-    - assets/images/u5213_selected.png
-    - assets/js/payment.js
-    - assets/js/complain.js
-    - assets/toolsJS/echarts.min.js
-    - assets/toolsJS/jquery-1.7.1.min.js
+    - images/2.0x/xuqiu.png
+    - images/3.0x/xuqiu.png
+    - images/4.0x/xuqiu.png
+    - images/2.0x/shouhou.png
+    - images/3.0x/shouhou.png
+    - images/4.0x/shouhou.png
+    - images/2.0x/toushu.png
+    - images/3.0x/toushu.png
+    - images/4.0x/toushu.png
+    - images/2.0x/1.png
+    - images/2.0x/2.png
+    - images/2.0x/3.png
+    - images/2.0x/4.png
+    - images/2.0x/5.png
+    - images/2.0x/6.png
+    - images/2.0x/7.png
+    - images/3.0x/1.png
+    - images/3.0x/2.png
+    - images/3.0x/3.png
+    - images/3.0x/4.png
+    - images/3.0x/5.png
+    - images/3.0x/6.png
+    - images/3.0x/7.png
+    - images/4.0x/1.png
+    - images/4.0x/2.png
+    - images/4.0x/3.png
+    - images/4.0x/4.png
+    - images/4.0x/5.png
+    - images/4.0x/6.png
+    - images/4.0x/7.png
 
 
   # To add assets to your application, add an assets section, like this:
