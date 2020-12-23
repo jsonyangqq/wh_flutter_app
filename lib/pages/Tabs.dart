@@ -1,13 +1,14 @@
 
 
 import 'package:flutter/material.dart';
+import 'package:wh_flutter_app/pages/tabs/Appointment.dart';
 import 'package:wh_flutter_app/pages/tabs/Service.dart';
 
 import 'tabs/Home.dart';
 
 class Tabs extends StatefulWidget {
   final index;
-  Tabs({Key key,this.index=1}) : super(key: key);
+  Tabs({Key key,this.index=2}) : super(key: key);
 
   _TabsState createState() => _TabsState(this.index);
 }
@@ -19,8 +20,10 @@ class _TabsState extends State<Tabs> {
     this._currentIndex=index;
   }
 
+
   List _pageList=[
     ServicePage(),
+    AppointmentPage(),
     HomePage()
   ];
   @override
@@ -44,6 +47,10 @@ class _TabsState extends State<Tabs> {
           BottomNavigationBarItem(
               icon: Icon(Icons.settings),
               title: Text("服务")
+          ),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.access_time),
+              title: Text("预约")
           ),
           BottomNavigationBarItem(
               icon: Icon(Icons.home),

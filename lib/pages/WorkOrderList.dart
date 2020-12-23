@@ -73,9 +73,30 @@ class _WorkOrderListPageState extends State<WorkOrderListPage> {
                         ),
                       );
     }else{
-      return widget;
+      return SizedBox();
     }
     
+  }
+
+  Widget getApplyIncoicBtn(String isComplete, int workOrderId) {
+    if("已完成".contains(isComplete)  || "已完工".contains(isComplete)) {
+      return RaisedButton(
+        child: Text('申请发票'),
+        color: Colors.lightBlue,
+        textColor: Colors.white,
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(ScreenAdapter.size(32.0))),
+        onPressed: () {
+          print("跳转到申请发票页面");
+          Navigator.pushNamed(
+              context, '/receipt',arguments: {
+            "workOrderId":workOrderId
+          });
+        },
+      );
+    }else {
+      return SizedBox(width: 1,height: 1,);
+    }
   }
 
  
@@ -197,6 +218,7 @@ List<Widget> _recWorkOrderListWidget(type) {
                           ),
                         ],
                       ),
+                      getApplyIncoicBtn(thisMonthWorkOrderModel.isComplete,thisMonthWorkOrderModel.workOrderId)
                     ],
                     onExpansionChanged: (value){
                       value = false;

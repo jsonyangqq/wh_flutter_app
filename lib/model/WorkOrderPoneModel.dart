@@ -1,6 +1,8 @@
 
 class WorkOrderPondModel {
   int workOrderId;
+  String checkfaillReason;
+  String resultBussback;
   String orderId;
   int decorationId;
   int orderItemId;
@@ -15,12 +17,15 @@ class WorkOrderPondModel {
   String appointUpTime;
   String appointUpEndTime;
   String isComplete;
+  String orderType;
   List<OrderItemDtoList> orderItemDtoList;
   bool visibleHomeEntry = false;
   bool visibleComplete = true;
 
   WorkOrderPondModel(
       {this.workOrderId,
+        this.checkfaillReason,
+        this.resultBussback,
         this.orderId,
         this.decorationId,
         this.orderItemId,
@@ -35,6 +40,7 @@ class WorkOrderPondModel {
         this.appointUpTime,
         this.appointUpEndTime,
         this.isComplete,
+        this.orderType,
         this.orderItemDtoList,
         this.visibleComplete,
         this.visibleHomeEntry
@@ -42,6 +48,8 @@ class WorkOrderPondModel {
 
   WorkOrderPondModel.fromJson(Map<String, dynamic> json) {
     workOrderId = json['workOrderId'];
+    checkfaillReason = json['checkfaillReason'];
+    resultBussback = json['resultBussback'];
     orderId = json['orderId'];
     decorationId = json['decorationId'];
     orderItemId = json['orderItemId'];
@@ -56,6 +64,7 @@ class WorkOrderPondModel {
     appointUpTime = json['appointUpTime'];
     appointUpEndTime = json['appointUpEndTime'];
     isComplete = json['isComplete'];
+    orderType = json['orderType'];
     visibleComplete = json['visibleComplete'];
     visibleHomeEntry = json['visibleHomeEntry'];
     if (json['orderItemDtoList'] != null) {
@@ -69,6 +78,8 @@ class WorkOrderPondModel {
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
     data['workOrderId'] = this.workOrderId;
+    data['checkfaillReason'] = this.checkfaillReason;
+    data['resultBussback'] = this.resultBussback;
     data['orderId'] = this.orderId;
     data['decorationId'] = this.decorationId;
     data['orderItemId'] = this.orderItemId;
@@ -83,6 +94,7 @@ class WorkOrderPondModel {
     data['appointUpTime'] = this.appointUpTime;
     data['appointUpEndTime'] = this.appointUpEndTime;
     data['isComplete'] = this.isComplete;
+    data['orderType'] = this.orderType;
     data['visibleComplete'] = this.visibleComplete;
     data['visibleHomeEntry'] = this.visibleHomeEntry;
     if (this.orderItemDtoList != null) {

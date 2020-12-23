@@ -1,5 +1,6 @@
 
 import 'dart:io';
+import 'dart:convert';
 
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
@@ -8,6 +9,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:wh_flutter_app/config/Config.dart';
 import 'package:wh_flutter_app/utils/DialogPage.dart';
 import 'package:wh_flutter_app/utils/ScreenAdapter.dart';
+import 'package:wh_flutter_app/utils/Storage.dart';
 import 'package:wh_flutter_app/utils/TextClickView.dart';
 
 /*已完成 确认服务页面*/
@@ -27,13 +29,23 @@ class _ComfirmServicePageState extends State<ComfirmServicePage> {
   String _imageUrlAddress='';
   int workOrderId;
   var selectFileUrlController = new TextEditingController();
+  Map<String,dynamic> userInfo = Map();
 
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
+    _getUserInfoData();
     this.workOrderId =widget.arguments['workOrderId'];
+  }
+
+  ///获取用户数据
+  _getUserInfoData() async {
+    Map<String,dynamic> userInfo = json.decode(await Storage.getString("userInfo"));
+    setState(() {
+      this.userInfo = userInfo;
+    });
   }
 
   _modelBottomSheet() async{
@@ -64,7 +76,7 @@ class _ComfirmServicePageState extends State<ComfirmServicePage> {
 
   /*拍照*/
   _takePhoto() async {
-    var image = await ImagePicker.pickImage(source: ImageSource.camera, maxWidth: 400);
+    var image = await ImagePicker.pickImage(source: ImageSource.camera);
 
     setState(() {
       this._image = image;
@@ -83,7 +95,7 @@ class _ComfirmServicePageState extends State<ComfirmServicePage> {
   /*相册*/
   _openGallery() async {
     var image =
-    await ImagePicker.pickImage(source: ImageSource.gallery, maxWidth: 400);
+    await ImagePicker.pickImage(source: ImageSource.gallery);
 
     setState(() {
       this._image = image;
@@ -207,10 +219,10 @@ class _ComfirmServicePageState extends State<ComfirmServicePage> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
                   Expanded(
-                    flex: 5,
+                    flex: 6,
                     child: Container(
                       alignment: Alignment.center,
-                      child: Image.asset('images/4.0x/u8634.png',width: ScreenAdapter.width(480.0),height: ScreenAdapter.height(480.0),),
+                      child: Image.network('${this.userInfo["spare1"]}',width: ScreenAdapter.width(700.0),height: ScreenAdapter.height(750.0),fit: BoxFit.fill,),
                     ),
                   ),
                   Expanded(

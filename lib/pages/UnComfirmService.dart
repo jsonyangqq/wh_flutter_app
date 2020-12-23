@@ -117,7 +117,7 @@ class _UnComfirmServicePageState extends State<UnComfirmServicePage> {
 
   /*拍照*/
   _takePhoto() async {
-    var image = await ImagePicker.pickImage(source: ImageSource.camera, maxWidth: 400);
+    var image = await ImagePicker.pickImage(source: ImageSource.camera);
 
     setState(() {
       this._image = image;
@@ -137,7 +137,7 @@ class _UnComfirmServicePageState extends State<UnComfirmServicePage> {
   /*相册*/
   _openGallery() async {
     var image =
-    await ImagePicker.pickImage(source: ImageSource.gallery, maxWidth: 400);
+    await ImagePicker.pickImage(source: ImageSource.gallery);
 
     setState(() {
       this._image = image;
@@ -156,31 +156,36 @@ class _UnComfirmServicePageState extends State<UnComfirmServicePage> {
   _uploadImage(File _imageDir) async {
 
     //注意：dio3.x版本为了兼容web做了一些修改，上传图片的时候需要把File类型转换成String类型，具体代码如下
-    if(_imageDir == null){
-      Fluttertoast.showToast(
-        msg: '请先上传图片',
-        toastLength: Toast.LENGTH_SHORT,
-        gravity: ToastGravity.CENTER,
-      );
-      return;
-    }
-    var fileDir=_imageDir.path;
-    setState(() {
-      this.imageUrlAddress = fileDir;
-    });
-    var fileName = fileDir.substring(fileDir.lastIndexOf("/")+1);
+//    if(_imageDir == null){
+//      Fluttertoast.showToast(
+//        msg: '请先上传图片',
+//        toastLength: Toast.LENGTH_SHORT,
+//        gravity: ToastGravity.CENTER,
+//      );
+//      return;
+//    }
+    var fileDir = "";
     String abilityStr = "";
-    this.abilityTagList.asMap().forEach((index,abilityTag){
-      if(index != this.abilityTagList.length-1 && abilityTag["flag"] == true){
-        abilityStr +=abilityTag["name"]+"##;";
-      }
-    });
+    var fileName = "";
+    if(_imageDir != null){
+      fileDir=_imageDir.path;
+      setState(() {
+        this.imageUrlAddress = fileDir;
+      });
+      fileName = fileDir.substring(fileDir.lastIndexOf("/")+1);
+      this.abilityTagList.asMap().forEach((index,abilityTag){
+        if(index != this.abilityTagList.length-1 && abilityTag["flag"] == true){
+          abilityStr +=abilityTag["name"]+"##;";
+        }
+      });
+    }
+
     FormData formData = FormData.fromMap({
       "workOrderId": this.workOrderId,
       "decorationId": this.decorationId,
       "chargebackType": "1",
       "description": abilityStr+this.descrptionReason,
-      "file":  await MultipartFile.fromFile(fileDir, filename: fileName)
+      "file":  _imageDir == null ? null : await MultipartFile.fromFile(fileDir, filename: fileName)
     });
     var api = Config.domain + "/mobile/workOrderService/getUnableCompleteChgBack";
     var response = await Dio().post(api, data: formData);

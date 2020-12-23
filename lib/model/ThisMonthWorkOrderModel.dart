@@ -11,7 +11,6 @@ class ThisMonthWorkOrderModel {
   String serviceFor;
   int haddone;
   String checkfaillReason;
-
   ThisMonthWorkOrderModel(
       {this.workOrderId,
       this.wxJobNumber,
