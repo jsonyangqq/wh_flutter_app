@@ -27,14 +27,21 @@ class _UnComfirmServicePageState extends State<UnComfirmServicePage> {
   int workOrderId;
   int decorationId;
   List abilityTagList;
-  File _image;
+  PickedFile _image;
   String imageUrlAddress;
   String hintTextChg = null;
   String descrptionReason;
+  List optionTagNameList;
+
+  final ImagePicker _picker = ImagePicker();
+
+  TextEditingController _editingController = new TextEditingController();
 
   @override
   void initState() {
     super.initState();
+    descrptionReason = "";
+    optionTagNameList = [];
     _getExistWOrderList();
     //获取其它页面传递过来的数据
     this.workOrderId =widget.arguments['workOrderId'];
@@ -69,18 +76,26 @@ class _UnComfirmServicePageState extends State<UnComfirmServicePage> {
               ),
               onPressed: () {
                 if(value["flag"] == false){
+                  //选中泡泡的时候
                   setState(() {
                     this.abilityTagList[index]['flag'] = true;
                     this.abilityTagList[index]['backgroundColor'] = Colors.lightBlue;
                     this.abilityTagList[index]['textColor'] = Colors.white;
+                    optionTagNameList.add(this.abilityTagList[index]['name']);
                   });
                 }else {
                   setState(() {
                     this.abilityTagList[index]['flag'] = false;
                     this.abilityTagList[index]['backgroundColor'] = Color.fromRGBO(242, 242, 242, 1);
                     this.abilityTagList[index]['textColor'] = Color.fromRGBO(102, 102, 102, 1);
+                    optionTagNameList.remove(this.abilityTagList[index]['name']);
                   });
                 }
+                descrptionReason = optionTagNameList.toString()?? '';
+                if(descrptionReason == '[]') {
+                  descrptionReason = '';
+                }
+                _editingController = new TextEditingController(text: descrptionReason);
               },
             )
         );
@@ -117,7 +132,7 @@ class _UnComfirmServicePageState extends State<UnComfirmServicePage> {
 
   /*拍照*/
   _takePhoto() async {
-    var image = await ImagePicker.pickImage(source: ImageSource.camera);
+    var image = await _picker.getImage(source: ImageSource.camera);
 
     setState(() {
       this._image = image;
@@ -137,7 +152,7 @@ class _UnComfirmServicePageState extends State<UnComfirmServicePage> {
   /*相册*/
   _openGallery() async {
     var image =
-    await ImagePicker.pickImage(source: ImageSource.gallery);
+    await _picker.getImage(source: ImageSource.gallery);
 
     setState(() {
       this._image = image;
@@ -153,7 +168,7 @@ class _UnComfirmServicePageState extends State<UnComfirmServicePage> {
   }
 
   //上传图片到服务器
-  _uploadImage(File _imageDir) async {
+  _uploadImage(PickedFile _imageDir) async {
 
     //注意：dio3.x版本为了兼容web做了一些修改，上传图片的时候需要把File类型转换成String类型，具体代码如下
 //    if(_imageDir == null){
@@ -165,7 +180,7 @@ class _UnComfirmServicePageState extends State<UnComfirmServicePage> {
 //      return;
 //    }
     var fileDir = "";
-    String abilityStr = "";
+//    String abilityStr = "";
     var fileName = "";
     if(_imageDir != null){
       fileDir=_imageDir.path;
@@ -173,18 +188,18 @@ class _UnComfirmServicePageState extends State<UnComfirmServicePage> {
         this.imageUrlAddress = fileDir;
       });
       fileName = fileDir.substring(fileDir.lastIndexOf("/")+1);
-      this.abilityTagList.asMap().forEach((index,abilityTag){
-        if(index != this.abilityTagList.length-1 && abilityTag["flag"] == true){
-          abilityStr +=abilityTag["name"]+"##;";
-        }
-      });
+//      this.abilityTagList.asMap().forEach((index,abilityTag){
+//        if(index != this.abilityTagList.length-1 && abilityTag["flag"] == true){
+//          abilityStr +=abilityTag["name"]+"##;";
+//        }
+//      });
     }
 
     FormData formData = FormData.fromMap({
       "workOrderId": this.workOrderId,
       "decorationId": this.decorationId,
       "chargebackType": "1",
-      "description": abilityStr+this.descrptionReason,
+      "description": this.descrptionReason,
       "file":  _imageDir == null ? null : await MultipartFile.fromFile(fileDir, filename: fileName)
     });
     var api = Config.domain + "/mobile/workOrderService/getUnableCompleteChgBack";
@@ -279,6 +294,7 @@ class _UnComfirmServicePageState extends State<UnComfirmServicePage> {
               ScreenAdapter.height(8)),
           child: TextField(
             maxLines: 6,
+            controller: _editingController,
             decoration: InputDecoration(
                 hintText: "请详细描述无法完成的原因～",
                 border: OutlineInputBorder(
@@ -295,6 +311,8 @@ class _UnComfirmServicePageState extends State<UnComfirmServicePage> {
             },
           ),
         ),
+        //显示上传的图片的位置
+        _buildImage(),
         Expanded(
           child: Padding(
             padding: EdgeInsets.only(bottom: ScreenAdapter.height(120)),
@@ -324,6 +342,29 @@ class _UnComfirmServicePageState extends State<UnComfirmServicePage> {
         )
       ],
     ),
+    );
+  }
+
+  /*加载图片*/
+  Widget _buildImage() {
+    if(this._image == null){
+      return Text('');
+    }
+    List<String> listImages = new List<String>();
+    listImages.add(this._image.path);
+    return Container(
+        alignment: Alignment.center,
+        height: ScreenAdapter.height(300.0),
+        child: GestureDetector(
+          onTap: () {
+            //点击图片的时候跳转道图片放大页面
+            Navigator.pushNamed(context,"/photoAssetGallery",arguments: {
+              "index": 0,
+              "galleryItems": listImages,
+            });
+          },
+          child: Image.file(new File(this._image.path),fit: BoxFit.cover,),
+        )
     );
   }
 }

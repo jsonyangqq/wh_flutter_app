@@ -4,6 +4,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:photo_view/photo_view.dart';
 import 'package:wh_flutter_app/config/Config.dart';
 import 'package:wh_flutter_app/utils/DashedRect.dart';
 import 'package:wh_flutter_app/utils/DialogPage.dart';
@@ -23,16 +24,23 @@ class ChargeBackApplyPage extends StatefulWidget {
 
 class _ChargeBackApplyPageState extends State<ChargeBackApplyPage> {
 
-  File _image;
+  PickedFile _image;
   int workOrderId;
   int decorationId;
   List abilityTagList;
   String imageUrlAddress;
   String descrptionReason;
+  List optionTagNameList;
+
+  final ImagePicker _picker = ImagePicker();
+
+  TextEditingController _editingController = new TextEditingController();
 
   @override
   void initState() {
     super.initState();
+    descrptionReason = "";
+    optionTagNameList = [];
     _getExistWOrderList();
     //获取其它页面传递过来的数据
     this.workOrderId =widget.arguments['workOrderId'];
@@ -71,14 +79,21 @@ class _ChargeBackApplyPageState extends State<ChargeBackApplyPage> {
                     this.abilityTagList[index]['flag'] = true;
                     this.abilityTagList[index]['backgroundColor'] = Colors.lightBlue;
                     this.abilityTagList[index]['textColor'] = Colors.white;
+                    optionTagNameList.add(this.abilityTagList[index]['name']);
                   });
                 }else {
                   setState(() {
                     this.abilityTagList[index]['flag'] = false;
                     this.abilityTagList[index]['backgroundColor'] = Color.fromRGBO(242, 242, 242, 1);
                     this.abilityTagList[index]['textColor'] = Color.fromRGBO(102, 102, 102, 1);
+                    optionTagNameList.remove(this.abilityTagList[index]['name']);
                   });
                 }
+                descrptionReason = optionTagNameList.toString()?? '';
+                if(descrptionReason == '[]') {
+                  descrptionReason = '';
+                }
+                _editingController = new TextEditingController(text: descrptionReason);
               },
             )
         );
@@ -117,7 +132,7 @@ class _ChargeBackApplyPageState extends State<ChargeBackApplyPage> {
 
   /*拍照*/
   _takePhoto() async {
-    var image = await ImagePicker.pickImage(source: ImageSource.camera);
+    var image = await _picker.getImage(source: ImageSource.camera);
 
     setState(() {
       this._image = image;
@@ -130,7 +145,7 @@ class _ChargeBackApplyPageState extends State<ChargeBackApplyPage> {
   /*相册*/
   _openGallery() async {
     var image =
-    await ImagePicker.pickImage(source: ImageSource.gallery);
+    await _picker.getImage(source: ImageSource.gallery);
 
     setState(() {
       this._image = image;
@@ -140,14 +155,27 @@ class _ChargeBackApplyPageState extends State<ChargeBackApplyPage> {
 
   /*定义一个显示图片的组件*/
   Widget _buildImage(){
+    List<String> listImages = new List<String>();
     if(this._image == null){
       return Text('请选择图片...');
     }
-      return Image.file(this._image,fit: BoxFit.fill,);
+    listImages.add(this._image.path);
+      return Container(
+        child: GestureDetector(
+          onTap: () {
+            //点击图片的时候跳转道图片放大页面
+            Navigator.pushNamed(context,"/photoAssetGallery",arguments: {
+              "index": 0,
+              "galleryItems": listImages,
+            });
+          },
+          child: Image.file(new File(this._image.path),width: ScreenAdapter.width(700.0),height: ScreenAdapter.height(750.0),fit: BoxFit.cover,),
+        )
+      );
   }
 
   //上传图片到服务器
-  _uploadImage(File _imageDir) async {
+  _uploadImage(PickedFile _imageDir) async {
 
     //注意：dio3.x版本为了兼容web做了一些修改，上传图片的时候需要把File类型转换成String类型，具体代码如下
 //    if(_imageDir == null){
@@ -208,7 +236,7 @@ class _ChargeBackApplyPageState extends State<ChargeBackApplyPage> {
       body: SingleChildScrollView(
         child: ConstrainedBox(
           constraints: new BoxConstraints(
-              minHeight: ScreenAdapter.height(120)
+              minHeight: ScreenAdapter.height(120),
           ),
           child: Column(
             children: <Widget>[
@@ -271,6 +299,7 @@ class _ChargeBackApplyPageState extends State<ChargeBackApplyPage> {
                     ScreenAdapter.height(8)),
                 child: TextField(
                   maxLines: 6,
+                  controller: _editingController,
                   decoration: InputDecoration(
                       hintText: "请填写退单理由～",
                       border: OutlineInputBorder(

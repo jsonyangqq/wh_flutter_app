@@ -8,24 +8,38 @@ import 'tabs/Home.dart';
 
 class Tabs extends StatefulWidget {
   final index;
-  Tabs({Key key,this.index=2}) : super(key: key);
+  int serviceHomeIndex;
+  Tabs({Key key,this.index=2,this.serviceHomeIndex = 0}) : super(key: key);
 
-  _TabsState createState() => _TabsState(this.index);
+  _TabsState createState() => _TabsState(this.index,this.serviceHomeIndex);
 }
 
 class _TabsState extends State<Tabs> {
 
-  int   _currentIndex;
-  _TabsState(index){
+  int _currentIndex;
+  int _serviceHomeIndex;
+
+  List _pageList;
+  _TabsState(index,serviceHomeIndex){
     this._currentIndex=index;
+    this._serviceHomeIndex=serviceHomeIndex;
   }
 
 
-  List _pageList=[
-    ServicePage(),
-    AppointmentPage(),
-    HomePage()
-  ];
+  @override
+  void initState() {
+    _initPageList();
+  }
+
+  _initPageList() {
+    _pageList = [
+      ServicePage(arguments: {"serviceHomeIndex": _serviceHomeIndex},),
+      AppointmentPage(),
+      HomePage()
+    ];
+  }
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(

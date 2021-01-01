@@ -1,139 +1,108 @@
-
 class WorkOrderPondModel {
   int workOrderId;
-  String checkfaillReason;
   String resultBussback;
+  String checkfaillReason;
   String orderId;
   int decorationId;
-  int orderItemId;
-  String serviceName;
-  double serviceFee;
-  int number;
   String description;
   String imageUrl;
   String username;
   String telphone;
   String detailAddress;
   String appointUpTime;
-  String appointUpEndTime;
   String isComplete;
   String orderType;
-  List<OrderItemDtoList> orderItemDtoList;
   bool visibleHomeEntry = false;
   bool visibleComplete = true;
+  String newWfJobNumber;
+  String areaName;
+  String serviceName;
+  double serviceFee;
+  int number;
+  String itvAccount;
+  String snNumber;
+  String broadbandWidth;
+  String assignAccount;
 
   WorkOrderPondModel(
       {this.workOrderId,
-        this.checkfaillReason,
         this.resultBussback,
+        this.checkfaillReason,
         this.orderId,
         this.decorationId,
-        this.orderItemId,
-        this.serviceName,
-        this.serviceFee,
-        this.number,
         this.description,
         this.imageUrl,
         this.username,
         this.telphone,
         this.detailAddress,
         this.appointUpTime,
-        this.appointUpEndTime,
         this.isComplete,
         this.orderType,
-        this.orderItemDtoList,
+        this.visibleHomeEntry,
         this.visibleComplete,
-        this.visibleHomeEntry
-      });
+        this.newWfJobNumber,
+        this.areaName,
+        this.serviceName,
+        this.serviceFee,
+        this.number,
+        this.itvAccount,
+        this.snNumber,
+        this.broadbandWidth,
+        this.assignAccount});
 
   WorkOrderPondModel.fromJson(Map<String, dynamic> json) {
     workOrderId = json['workOrderId'];
-    checkfaillReason = json['checkfaillReason'];
     resultBussback = json['resultBussback'];
+    checkfaillReason = json['checkfaillReason'];
     orderId = json['orderId'];
     decorationId = json['decorationId'];
-    orderItemId = json['orderItemId'];
-    serviceName = json['serviceName'];
-    serviceFee = json['serviceFee'];
-    number = json['number'];
     description = json['description'];
     imageUrl = json['imageUrl'];
     username = json['username'];
     telphone = json['telphone'];
     detailAddress = json['detailAddress'];
     appointUpTime = json['appointUpTime'];
-    appointUpEndTime = json['appointUpEndTime'];
     isComplete = json['isComplete'];
     orderType = json['orderType'];
-    visibleComplete = json['visibleComplete'];
     visibleHomeEntry = json['visibleHomeEntry'];
-    if (json['orderItemDtoList'] != null) {
-      orderItemDtoList = new List<OrderItemDtoList>();
-      json['orderItemDtoList'].forEach((v) {
-        orderItemDtoList.add(new OrderItemDtoList.fromJson(v));
-      });
-    }
+    visibleComplete = json['visibleComplete'];
+    newWfJobNumber = json['newWfJobNumber'];
+    areaName = json['areaName'];
+    serviceName = json['serviceName'];
+    serviceFee = json['serviceFee'];
+    number = json['number'];
+    itvAccount = json['itvAccount'];
+    snNumber = json['snNumber'];
+    broadbandWidth = json['broadbandWidth'];
+    assignAccount = json['assignAccount'];
   }
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
     data['workOrderId'] = this.workOrderId;
-    data['checkfaillReason'] = this.checkfaillReason;
     data['resultBussback'] = this.resultBussback;
+    data['checkfaillReason'] = this.checkfaillReason;
     data['orderId'] = this.orderId;
     data['decorationId'] = this.decorationId;
-    data['orderItemId'] = this.orderItemId;
-    data['serviceName'] = this.serviceName;
-    data['serviceFee'] = this.serviceFee;
-    data['number'] = this.number;
     data['description'] = this.description;
     data['imageUrl'] = this.imageUrl;
     data['username'] = this.username;
     data['telphone'] = this.telphone;
     data['detailAddress'] = this.detailAddress;
     data['appointUpTime'] = this.appointUpTime;
-    data['appointUpEndTime'] = this.appointUpEndTime;
     data['isComplete'] = this.isComplete;
     data['orderType'] = this.orderType;
-    data['visibleComplete'] = this.visibleComplete;
     data['visibleHomeEntry'] = this.visibleHomeEntry;
-    if (this.orderItemDtoList != null) {
-      data['orderItemDtoList'] =
-          this.orderItemDtoList.map((v) => v.toJson()).toList();
-    }
-    return data;
-  }
-}
-
-class OrderItemDtoList {
-  int workOrderId;
-  int orderItemId;
-  String serviceName;
-  double serviceFee;
-  int number;
-
-  OrderItemDtoList(
-      {this.workOrderId,
-        this.orderItemId,
-        this.serviceName,
-        this.serviceFee,
-        this.number});
-
-  OrderItemDtoList.fromJson(Map<String, dynamic> json) {
-    workOrderId = json['workOrderId'];
-    orderItemId = json['orderItemId'];
-    serviceName = json['serviceName'];
-    serviceFee = json['serviceFee'];
-    number = json['number'];
-  }
-
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['workOrderId'] = this.workOrderId;
-    data['orderItemId'] = this.orderItemId;
+    data['visibleComplete'] = this.visibleComplete;
+    data['newWfJobNumber'] = this.newWfJobNumber;
+    data['areaName'] = this.areaName;
     data['serviceName'] = this.serviceName;
     data['serviceFee'] = this.serviceFee;
     data['number'] = this.number;
+    data['itvAccount'] = this.itvAccount;
+    data['snNumber'] = this.snNumber;
+    data['broadbandWidth'] = this.broadbandWidth;
+    data['assignAccount'] = this.assignAccount;
     return data;
   }
 }

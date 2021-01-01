@@ -15,11 +15,16 @@ import 'package:wh_flutter_app/utils/Storage.dart';
 import 'package:wh_flutter_app/utils/TextClickView.dart';
 
 class ServicePage extends StatefulWidget {
+
+  Map arguments;
+
+  ServicePage({Key key, this.arguments}) : super(key: key);
+
   @override
   _ServicePageState createState() => _ServicePageState();
 }
 
-class _ServicePageState extends State<ServicePage> {
+class _ServicePageState extends State<ServicePage> with TickerProviderStateMixin, AutomaticKeepAliveClientMixin{
 
   bool flag = true;
   Map<String,dynamic> userInfo = Map();
@@ -30,18 +35,30 @@ class _ServicePageState extends State<ServicePage> {
   //工单池显示 服务名称标题容器占比  占手机总屏幕得71%
   double workOrderTitleWdithRate = 0.71;
 
+  PageController _pageController = new PageController();
+
+  TabController _tabController;
+
   @override
   void initState() {
     super.initState();
+    setState(() {
+      if(widget.arguments != null && widget.arguments["serviceHomeIndex"] != null) {
+        currentIndex = widget.arguments["serviceHomeIndex"];
+      }
+      print('打印的回调的值为$currentIndex');
+      _tabController = TabController(initialIndex: currentIndex, length: 2,vsync: this);
+    });
     _loadPowerExeu();
   }
 
-  Future _loadPowerExeu() async {
-    _getUserInfoData().then((info){
-      _getWorkOrderPoneData().then((info){
 
+  Future _loadPowerExeu() async {
+      _getUserInfoData().then((info){
+        _getWorkOrderPoneData().then((info){
+
+        });
       });
-    });
   }
 
 
@@ -66,6 +83,7 @@ class _ServicePageState extends State<ServicePage> {
     }
   }
 
+
   ///遍历工单池数据
   List<Widget> _recWorkOrderListWidget() {
     List<Widget> list = new List<Widget>();
@@ -87,40 +105,32 @@ class _ServicePageState extends State<ServicePage> {
                     initiallyExpanded: this.flag,
                     trailing: Text('￥${workOrderPondModel.serviceFee}', style: TextStyle(fontSize: ScreenAdapter.size(26.0),
                         color: Colors.amberAccent,
-                        fontWeight: FontWeight.w500)
+                        fontWeight: FontWeight.w500),
                     ),
-                    title: Row(
-                      children: <Widget>[
-                        Container(
-                          alignment: Alignment.topLeft,
-                          width: ScreenAdapter.getScreenWidth() * workOrderTitleWdithRate,//避免超出手机屏幕，所以要给容易一个宽度，超出部分自动隐藏
-                          child: Padding(
+                    title: Container(
+                        alignment: Alignment.topLeft,
+                        width: ScreenAdapter.getScreenWidth() * workOrderTitleWdithRate,//避免超出手机屏幕，所以要给容易一个宽度，超出部分自动隐藏
+                        child: Padding(
                           padding: EdgeInsets.only(left: ScreenAdapter.width(0.0)),
-                          child: Text('服务名称：${workOrderPondModel.serviceName}', style: TextStyle(
+                          child: Text('客户序号：${workOrderPondModel.newWfJobNumber.substring(4,8)}${workOrderPondModel.newWfJobNumber.substring(workOrderPondModel.newWfJobNumber.length-4)}', style: TextStyle(
                               fontSize: ScreenAdapter.size(26.0),
-                              fontWeight: FontWeight.w300),overflow: TextOverflow.ellipsis),
+                              fontWeight: FontWeight.w500),overflow: TextOverflow.ellipsis),
                         )),
-                      ],
-                    ),
                     children: <Widget>[
                       Padding(
                         padding: EdgeInsets.fromLTRB(
-                            ScreenAdapter.width(24.0) , ScreenAdapter.height(0.0), ScreenAdapter.width(24.0), ScreenAdapter.height(0.0)),
+                            ScreenAdapter.width(28.0) , ScreenAdapter.height(0.0), ScreenAdapter.width(24.0), ScreenAdapter.height(0.0)),
                         child: Container(
                           alignment: Alignment.topLeft,
                           child: Text(
-                            '${workOrderPondModel.description}',
-                            maxLines: 5,
+                            '用户问题描述：${workOrderPondModel.description}',
+                            maxLines: 8,
                             overflow: TextOverflow.ellipsis,
                             style: TextStyle(fontSize: ScreenAdapter.size(24.0)),
                           ),
                         ),
                       ),
-                      ///针对的是多个商品项
-                      Column(
-                        children: _getOtherWorkOrderDetailsInfo(workOrderPondModel.orderItemDtoList,workOrderPondModel.description)
-                      ),
-                      ///针对的是图片
+                      ///用户上传的图片，针对的是图片
                       Column(
                         children: <Widget>[
                           Container(
@@ -133,12 +143,13 @@ class _ServicePageState extends State<ServicePage> {
                           )
                         ],
                       ),
+                      //这一块记录用户具体提交的订单信息，以及生成的一些工单内容信息
                       Padding(
                         padding: EdgeInsets.fromLTRB(
-                            ScreenAdapter.width(28.0), ScreenAdapter.height(16.0), ScreenAdapter.width(16.0), ScreenAdapter.height(8.0)),
+                            ScreenAdapter.width(28.0), ScreenAdapter.height(0.0), ScreenAdapter.width(16.0), ScreenAdapter.height(4.0)),
                         child: Container(
                           alignment: Alignment.topLeft,
-                          child: Text('预约时间：${formatDate(DateTime.parse(workOrderPondModel.appointUpTime),[yyyy, '-', mm, '-', dd, ' ', 'HH', ':', 'nn'])}',
+                          child: Text('新工作流工单流水号：${workOrderPondModel.newWfJobNumber}',
                               style: TextStyle(
                                   fontSize: ScreenAdapter.size(24.0),
                                   color: Colors.black87),
@@ -147,13 +158,37 @@ class _ServicePageState extends State<ServicePage> {
                       ),
                       Padding(
                         padding: EdgeInsets.fromLTRB(
-                            ScreenAdapter.width(28.0), ScreenAdapter.height(16.0), ScreenAdapter.width(16.0), ScreenAdapter.height(8.0)),
+                            ScreenAdapter.width(28.0), ScreenAdapter.height(0.0), ScreenAdapter.width(16.0), ScreenAdapter.height(4.0)),
+                        child: Container(
+                          alignment: Alignment.topLeft,
+                          child: Text('服务内容：${workOrderPondModel.serviceName}',
+                              style: TextStyle(
+                                  fontSize: ScreenAdapter.size(24.0),
+                                  color: Colors.black87),
+                              textAlign: TextAlign.right),
+                        ),
+                      ),
+                      Padding(
+                        padding: EdgeInsets.fromLTRB(
+                            ScreenAdapter.width(28.0), ScreenAdapter.height(0.0), ScreenAdapter.width(16.0), ScreenAdapter.height(4.0)),
+                        child: Container(
+                          alignment: Alignment.topLeft,
+                          child: Text('预约时间：${formatDate(DateTime.parse(workOrderPondModel.appointUpTime),[yyyy, '-', mm, '-', dd])}',
+                              style: TextStyle(
+                                  fontSize: ScreenAdapter.size(24.0),
+                                  color: Colors.black87),
+                              textAlign: TextAlign.right),
+                        ),
+                      ),
+                      Padding(
+                        padding: EdgeInsets.fromLTRB(
+                            ScreenAdapter.width(28.0), ScreenAdapter.height(0.0), ScreenAdapter.width(16.0), ScreenAdapter.height(8.0)),
                         child: Container(
                           alignment: Alignment.topLeft,
                           child: GestureDetector(
                             child: Container(
                                 child: SelectableText(
-                                  '用户地址：${workOrderPondModel.detailAddress.replaceAll(workOrderPondModel.detailAddress.substring(workOrderPondModel.detailAddress.lastIndexOf('区')+1), '')}',
+                                  '客户地址：${workOrderPondModel.detailAddress.replaceAll(workOrderPondModel.detailAddress.substring(workOrderPondModel.detailAddress.lastIndexOf('区')+1), '')}',
                                   style: TextStyle(color: Colors.black87,fontSize: ScreenAdapter.size(24.0)),
                                   scrollPhysics: ClampingScrollPhysics(),
                                 )),
@@ -187,68 +222,6 @@ class _ServicePageState extends State<ServicePage> {
     return list;
   }
 
-  ///获取除去第一个以外多余的服务项
-  List<Widget> _getOtherWorkOrderDetailsInfo(List<OrderItemDtoList> orderItemDtoList, String description){
-    List<Widget> list = new List();
-    orderItemDtoList.asMap().forEach((index,value){
-        if(index>0){
-          list.add(Column(
-            children: <Widget>[
-              Row(
-                children: <Widget>[
-                  Padding(
-                    padding: EdgeInsets.only(left:ScreenAdapter.width(24),top: ScreenAdapter.height(26)),
-                    child: Container(
-                        alignment: Alignment.topLeft,
-                        child: Padding(
-                          padding: const EdgeInsets.only(left: 0.0),
-                          child: Text('服务名称：${value.serviceName}', style: TextStyle(
-                              fontSize: ScreenAdapter.size(22.0),
-                              color: Colors.blue,
-                              fontWeight: FontWeight.w300),overflow: TextOverflow.ellipsis),
-                        )),
-                  ),
-                  Expanded(
-                    child: Container(
-                      alignment: Alignment.bottomRight,
-                      margin: EdgeInsets.only(right: ScreenAdapter.width(36.0),top: ScreenAdapter.height(26.0)),
-                      child: RichText(
-                        text: TextSpan(
-                            children: [
-                              TextSpan(
-                                  text: "￥${value.serviceFee}",
-                                  style: TextStyle(
-                                      fontSize: ScreenAdapter.size(26.0),
-                                      color: Colors.amberAccent,
-                                      fontWeight: FontWeight.w500
-                                  )),
-                            ]
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              Padding(
-                padding: EdgeInsets.fromLTRB(
-                    ScreenAdapter.width(24.0) , ScreenAdapter.height(20.0), ScreenAdapter.width(24.0), ScreenAdapter.height(0.0)),
-                child: Container(
-                  alignment: Alignment.topLeft,
-                  child: Text(
-                    '${description}',
-                    maxLines: 5,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(fontSize: ScreenAdapter.size(20.0)),
-                  ),
-                ),
-              )
-            ],
-          ));
-        }
-    });
-    return list;
-  }
-
   ///获取工单池图片
   List<Widget> _getImageUrlShow(String imageUrls) {
     List<Widget> list = new List();
@@ -278,6 +251,8 @@ class _ServicePageState extends State<ServicePage> {
     List<Widget> list = new List();
     this._workOrderPondDataList.asMap().forEach((index,value) {
       WorkOrderPondModel workOrderPondModel = WorkOrderPondModel.fromJson(value);
+      var imageUrls = workOrderPondModel.imageUrl;
+      List<String> listImages = (imageUrls==null || imageUrls == "") ?  new List<String>() : imageUrls.substring(0,imageUrls.lastIndexOf(";")).split(";");
       //66表示处理中的售后工单
       if (workOrderPondModel.decorationId != null && workOrderPondModel.orderType == "2") {
         list.add(
@@ -308,31 +283,20 @@ class _ServicePageState extends State<ServicePage> {
                                     fontSize: ScreenAdapter.size(26.0),
                                     color: Colors.red,
                                     fontWeight: FontWeight.w500
-                                )),
-                            TextSpan(
-                                text: "×${workOrderPondModel.number}",
-                                style: TextStyle(
-                                  fontSize: ScreenAdapter.size(18.0),
-                                  color: Colors.red,
-                                )
-                            )
+                                ))
                           ]
                       ),
                     ),
-                    title: Row(
-                      children: <Widget>[
-                        Container(
-                            alignment: Alignment.topLeft,
-                            width: ScreenAdapter.getScreenWidth() * titleWdithRate,//避免超出手机屏幕，所以要给容易一个宽度，超出部分自动隐藏
-                            child: Padding(
-                              padding: const EdgeInsets.only(left: 0.0),
-                              child: Text('${workOrderPondModel.serviceName}', style: TextStyle(
-                                  fontSize: ScreenAdapter.size(26),
-                                  color: Colors.red,
-                                  fontWeight: FontWeight.w300),maxLines:1,overflow: TextOverflow.ellipsis,),
-                            ))
-                      ],
-                    ),
+                    title: Container(
+                        alignment: Alignment.topLeft,
+                        width: ScreenAdapter.getScreenWidth() * titleWdithRate,//避免超出手机屏幕，所以要给容易一个宽度，超出部分自动隐藏
+                        child: Padding(
+                          padding: const EdgeInsets.only(left: 0.0),
+                          child: Text('客户序号：${workOrderPondModel.newWfJobNumber.substring(4,8)}${workOrderPondModel.newWfJobNumber.substring(workOrderPondModel.newWfJobNumber.length-4)}', style: TextStyle(
+                              fontSize: ScreenAdapter.size(26),
+                              color: Colors.red,
+                              fontWeight: FontWeight.w500),maxLines:1,overflow: TextOverflow.ellipsis,),
+                        )),
                     children: <Widget>[
                       Padding(
                         padding: EdgeInsets.fromLTRB(
@@ -340,42 +304,15 @@ class _ServicePageState extends State<ServicePage> {
                         child: Container(
                             alignment: Alignment.topLeft,
                             child: RichText(
-                                maxLines: 5,
+                                maxLines: 8,
                                 overflow: TextOverflow.ellipsis,
                                 text: TextSpan(
                                     children: [
                                       TextSpan(
-                                        text: '${workOrderPondModel.description}',
+                                        text: '用户问题描述：${workOrderPondModel.description}',
                                         style: TextStyle(
                                             fontSize: ScreenAdapter.size(24.0),
                                             color: Colors.red),
-                                      ),
-                                      TextSpan(
-                                          text: '删除',
-                                          style: TextStyle(
-                                              fontSize: ScreenAdapter.size(24.0),
-                                              color: Colors.blue
-                                          ),
-                                          recognizer: TapGestureRecognizer()
-                                            ..onTap = () {
-//                                            print(this._workOrderPondDataList);
-                                              if(workOrderPondModel.visibleComplete == false){
-                                                if(this._workOrderPondDataList[index]['orderItemDtoList'].length >1) {
-                                                  DialogPage.alertDialog(
-                                                      context, value['serviceName']).then((info){
-                                                    if(info == "OK"){
-                                                      _loadDeleteUsWOrderExeu(value['orderItemId']);
-                                                    }
-                                                  });
-                                                }
-                                              }else {
-                                                Fluttertoast.showToast(
-                                                  msg: '修改工单信息需要确认上门经用户同意方能修改',
-                                                  toastLength: Toast.LENGTH_SHORT,
-                                                  gravity: ToastGravity.CENTER,
-                                                );
-                                              }
-                                            }
                                       )
                                     ]
                                 )
@@ -383,85 +320,13 @@ class _ServicePageState extends State<ServicePage> {
                         ),
                       ),
                       Column(
-                          children: _getmyOtherWorkOrderDetailsInfo(workOrderPondModel.orderItemDtoList, workOrderPondModel.description, workOrderPondModel.visibleComplete)
-                      ),
-                      Column(
                         children: <Widget>[
-                          Container(
-                            margin: EdgeInsets.only(top: ScreenAdapter.width(
-                                20.0)),
-                            child: Wrap(
-                                spacing: ScreenAdapter.width(46),
-                                children: _getMyImageUrlShow(workOrderPondModel.imageUrl)
-                            ),
-                          ),
+                          //加载图片的方法
+                          _loadWxUserUploadImages(listImages),
+                          //加载工单复合未通过原因的方法
                           getCheckfaillReason(workOrderPondModel.checkfaillReason),
-                          Padding(
-                            padding: EdgeInsets.fromLTRB(
-                                ScreenAdapter.width(28.0),
-                                ScreenAdapter.height(16.0),
-                                ScreenAdapter.width(16.0),
-                                ScreenAdapter.height(8.0)),
-                            child: Container(
-                              alignment: Alignment.topLeft,
-                              child: Text('用户姓名：${workOrderPondModel.username}',
-                                style: TextStyle(fontSize: ScreenAdapter.size(24.0),color: Colors.red),),
-                            ),
-                          ),
-                          Padding(
-                            padding: EdgeInsets.fromLTRB(
-                                ScreenAdapter.width(28.0),
-                                ScreenAdapter.height(1.0),
-                                ScreenAdapter.width(16.0),
-                                ScreenAdapter.height(8.0)),
-                            child: Container(
-                              alignment: Alignment.topLeft,
-                              child: GestureDetector(
-                                child: Container(
-                                    child: SelectableText(
-                                      '联系方式：${workOrderPondModel.telphone}',
-                                      style: TextStyle(color: Colors.red,fontSize: ScreenAdapter.size(24.0)),
-                                      scrollPhysics: ClampingScrollPhysics(),
-                                    )),
-                                onLongPress: () {
-
-                                },
-                              ),
-                            ),
-                          ),
-                          Padding(
-                            padding: EdgeInsets.fromLTRB(
-                                ScreenAdapter.width(28.0),
-                                ScreenAdapter.height(1.0),
-                                ScreenAdapter.width(16.0),
-                                ScreenAdapter.height(8.0)),
-                            child: Container(
-                              alignment: Alignment.topLeft,
-                              child: GestureDetector(
-                                child: Container(
-                                    child: SelectableText(
-                                      '用户地址：${workOrderPondModel.detailAddress}',
-                                      style: TextStyle(color: Colors.red,fontSize: ScreenAdapter.size(24.0)),
-                                      scrollPhysics: ClampingScrollPhysics(),
-                                    )),
-                                onLongPress: () {
-
-                                },
-                              ),
-                            ),
-                          ),
-                          Padding(
-                            padding: EdgeInsets.fromLTRB(
-                                ScreenAdapter.width(28.0),
-                                ScreenAdapter.height(1.0),
-                                ScreenAdapter.width(16.0),
-                                ScreenAdapter.height(8.0)),
-                            child: Container(
-                                alignment: Alignment.topLeft,
-                                child: Text('预约时间：${formatDate(DateTime.parse(workOrderPondModel.appointUpTime),[yyyy, '-', mm, '-', dd, ' ', 'HH', ':', 'nn'])} - ${formatDate(DateTime.parse(workOrderPondModel.appointUpEndTime),['HH', ':', 'nn'])}',
-                                    style: TextStyle(fontSize: ScreenAdapter.size(24.0),color: Colors.red))
-                            ),
-                          ),
+                          //工用的工单详情列表
+                          universalWorkOrderAttributes(workOrderPondModel,Colors.red),
                           Offstage(
                               offstage: workOrderPondModel.visibleComplete,
                               child: Padding(
@@ -469,24 +334,30 @@ class _ServicePageState extends State<ServicePage> {
                                     ScreenAdapter.width(15.0), ScreenAdapter.height(10.0), ScreenAdapter.width(0.0), ScreenAdapter.height(5.0)),
                                 child: Row(
                                   children: <Widget>[
-                                    Transform.rotate(
-                                      angle: math.pi / 4.0,
-                                      child: IconButton(
-                                        icon: ImageIcon(
-                                          AssetImage('images/2.0x/u5944.png'),
-                                          size: ScreenAdapter.size(30),),
-                                        onPressed: () {
-                                          Navigator.pushNamed(
-                                              context, '/appendService',arguments: {
-                                            "workOrderId":workOrderPondModel.workOrderId,
-                                            "orderId":workOrderPondModel.orderId,
-                                            "decorationId":userInfo["decorationId"]
-                                          });
-                                        },
+                                    Container(
+                                      width: ScreenAdapter.width(30.0),
+                                      child: Transform.rotate(
+                                        angle: math.pi / 180,
+                                        child: IconButton(
+                                          icon: Icon(
+                                            IconData(0xe60c,fontFamily: 'AntdIcons'),
+                                            size: ScreenAdapter.size(30.0),
+                                            color: Colors.black,
+                                          ),
+                                          onPressed: () {
+                                            Navigator.pushNamed(
+                                                context, '/appendService',arguments: {
+                                              "workOrderId":workOrderPondModel.workOrderId,
+                                              "orderId":workOrderPondModel.orderId,
+                                              "decorationId":userInfo["decorationId"]
+                                            });
+                                          },
+                                        ),
                                       ),
                                     ),
+                                    SizedBox(width: ScreenAdapter.width(20.0),),
                                     TextClickView(
-                                      title: "追加服务",
+                                      title: "修改服务",
                                       style: TextStyle(
                                           fontSize: ScreenAdapter.size(20),
                                           fontWeight: FontWeight.w500,
@@ -622,31 +493,20 @@ class _ServicePageState extends State<ServicePage> {
                                     fontSize: ScreenAdapter.size(26.0),
                                     color: Colors.red,
                                     fontWeight: FontWeight.w500
-                                )),
-                            TextSpan(
-                                text: "×${workOrderPondModel.number}",
-                                style: TextStyle(
-                                  fontSize: ScreenAdapter.size(18.0),
-                                  color: Colors.red,
-                                )
-                            )
+                                ))
                           ]
                       ),
                     ),
-                    title: Row(
-                      children: <Widget>[
-                        Container(
+                    title: Container(
                             alignment: Alignment.topLeft,
                             width: ScreenAdapter.getScreenWidth() * titleWdithRate,//避免超出手机屏幕，所以要给容易一个宽度，超出部分自动隐藏
                             child: Padding(
                               padding: const EdgeInsets.only(left: 0.0),
-                              child: Text('${workOrderPondModel.serviceName}', style: TextStyle(
+                              child: Text('客户序号：${workOrderPondModel.newWfJobNumber.substring(4,8)}${workOrderPondModel.newWfJobNumber.substring(workOrderPondModel.newWfJobNumber.length-4)}', style: TextStyle(
                                   fontSize: ScreenAdapter.size(26),
                                   color: Colors.red,
-                                  fontWeight: FontWeight.w300),maxLines:1,overflow: TextOverflow.ellipsis,),
-                            ))
-                      ],
-                    ),
+                                  fontWeight: FontWeight.w500),maxLines:1,overflow: TextOverflow.ellipsis,),
+                            )),
                     children: <Widget>[
                       Padding(
                         padding: EdgeInsets.fromLTRB(
@@ -654,42 +514,15 @@ class _ServicePageState extends State<ServicePage> {
                         child: Container(
                             alignment: Alignment.topLeft,
                             child: RichText(
-                                maxLines: 5,
+                                maxLines: 8,
                                 overflow: TextOverflow.ellipsis,
                                 text: TextSpan(
                                     children: [
                                       TextSpan(
-                                        text: '${workOrderPondModel.description}',
+                                        text: '用户问题描述：${workOrderPondModel.description}',
                                         style: TextStyle(
                                             fontSize: ScreenAdapter.size(24.0),
                                             color: Colors.red),
-                                      ),
-                                      TextSpan(
-                                          text: '删除',
-                                          style: TextStyle(
-                                              fontSize: ScreenAdapter.size(24.0),
-                                              color: Colors.blue
-                                          ),
-                                          recognizer: TapGestureRecognizer()
-                                            ..onTap = () {
-//                                            print(this._workOrderPondDataList);
-                                              if(workOrderPondModel.visibleComplete == false){
-                                                if(this._workOrderPondDataList[index]['orderItemDtoList'].length >1) {
-                                                  DialogPage.alertDialog(
-                                                      context, value['serviceName']).then((info){
-                                                    if(info == "OK"){
-                                                      _loadDeleteUsWOrderExeu(value['orderItemId']);
-                                                    }
-                                                  });
-                                                }
-                                              }else {
-                                                Fluttertoast.showToast(
-                                                  msg: '修改工单信息需要确认上门经用户同意方能修改',
-                                                  toastLength: Toast.LENGTH_SHORT,
-                                                  gravity: ToastGravity.CENTER,
-                                                );
-                                              }
-                                            }
                                       )
                                     ]
                                 )
@@ -697,110 +530,45 @@ class _ServicePageState extends State<ServicePage> {
                         ),
                       ),
                       Column(
-                          children: _getmyOtherWorkOrderDetailsInfo(workOrderPondModel.orderItemDtoList, workOrderPondModel.description, workOrderPondModel.visibleComplete)
-                      ),
-                      Column(
                         children: <Widget>[
-                          Container(
-                            margin: EdgeInsets.only(top: ScreenAdapter.width(
-                                20.0)),
-                            child: Wrap(
-                                spacing: ScreenAdapter.width(46),
-                                children: _getMyImageUrlShow(workOrderPondModel.imageUrl)
-                            ),
-                          ),
+                          //加载图片的方法
+                          _loadWxUserUploadImages(listImages),
+                          //加载工单复合未通过原因的方法
                           getCheckfaillReason(workOrderPondModel.checkfaillReason),
-                          Padding(
-                            padding: EdgeInsets.fromLTRB(
-                                ScreenAdapter.width(28.0),
-                                ScreenAdapter.height(16.0),
-                                ScreenAdapter.width(16.0),
-                                ScreenAdapter.height(8.0)),
-                            child: Container(
-                              alignment: Alignment.topLeft,
-                              child: Text('用户姓名：${workOrderPondModel.username}',
-                                style: TextStyle(fontSize: ScreenAdapter.size(24.0),color: Colors.red),),
-                            ),
-                          ),
-                          Padding(
-                            padding: EdgeInsets.fromLTRB(
-                                ScreenAdapter.width(28.0),
-                                ScreenAdapter.height(1.0),
-                                ScreenAdapter.width(16.0),
-                                ScreenAdapter.height(8.0)),
-                            child: Container(
-                              alignment: Alignment.topLeft,
-                              child: GestureDetector(
-                                child: Container(
-                                    child: SelectableText(
-                                      '联系方式：${workOrderPondModel.telphone}',
-                                      style: TextStyle(color: Colors.red,fontSize: ScreenAdapter.size(24.0)),
-                                      scrollPhysics: ClampingScrollPhysics(),
-                                    )),
-                                onLongPress: () {
-
-                                },
-                              ),
-                            ),
-                          ),
-                          Padding(
-                            padding: EdgeInsets.fromLTRB(
-                                ScreenAdapter.width(28.0),
-                                ScreenAdapter.height(1.0),
-                                ScreenAdapter.width(16.0),
-                                ScreenAdapter.height(8.0)),
-                            child: Container(
-                              alignment: Alignment.topLeft,
-                              child: GestureDetector(
-                                child: Container(
-                                    child: SelectableText(
-                                      '用户地址：${workOrderPondModel.detailAddress}',
-                                      style: TextStyle(color: Colors.red,fontSize: ScreenAdapter.size(24.0)),
-                                      scrollPhysics: ClampingScrollPhysics(),
-                                    )),
-                                onLongPress: () {
-
-                                },
-                              ),
-                            ),
-                          ),
-                          Padding(
-                            padding: EdgeInsets.fromLTRB(
-                                ScreenAdapter.width(28.0),
-                                ScreenAdapter.height(1.0),
-                                ScreenAdapter.width(16.0),
-                                ScreenAdapter.height(8.0)),
-                            child: Container(
-                                alignment: Alignment.topLeft,
-                                child: Text('预约时间：${formatDate(DateTime.parse(workOrderPondModel.appointUpTime),[yyyy, '-', mm, '-', dd, ' ', 'HH', ':', 'nn'])} - ${formatDate(DateTime.parse(workOrderPondModel.appointUpEndTime),['HH', ':', 'nn'])}',
-                                    style: TextStyle(fontSize: ScreenAdapter.size(24.0),color: Colors.red))
-                            ),
-                          ),
+                          //工单类型固有的工单属性列表
+                          universalWorkOrderAttributes(workOrderPondModel,Colors.red),
                           Offstage(
                               offstage: workOrderPondModel.visibleComplete,
                               child: Padding(
                                 padding: EdgeInsets.fromLTRB(
                                     ScreenAdapter.width(15.0), ScreenAdapter.height(10.0), ScreenAdapter.width(0.0), ScreenAdapter.height(5.0)),
                                 child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.start,
                                   children: <Widget>[
-                                    Transform.rotate(
-                                      angle: math.pi / 4.0,
-                                      child: IconButton(
-                                        icon: ImageIcon(
-                                          AssetImage('images/2.0x/u5944.png'),
-                                          size: ScreenAdapter.size(30),),
-                                        onPressed: () {
-                                          Navigator.pushNamed(
-                                              context, '/appendService',arguments: {
-                                            "workOrderId":workOrderPondModel.workOrderId,
-                                            "orderId":workOrderPondModel.orderId,
-                                            "decorationId":userInfo["decorationId"]
-                                          });
-                                        },
+                                    Container(
+                                      width: ScreenAdapter.width(30.0),
+                                      child: Transform.rotate(
+                                        angle: math.pi / 180,
+                                        child: IconButton(
+                                          icon: Icon(
+                                              IconData(0xe60c,fontFamily: 'AntdIcons'),
+                                              size: ScreenAdapter.size(30.0),
+                                              color: Colors.black,
+                                          ),
+                                          onPressed: () {
+                                            Navigator.pushNamed(
+                                                context, '/appendService',arguments: {
+                                              "workOrderId":workOrderPondModel.workOrderId,
+                                              "orderId":workOrderPondModel.orderId,
+                                              "decorationId":userInfo["decorationId"]
+                                            });
+                                          },
+                                        ),
                                       ),
                                     ),
+                                    SizedBox(width: ScreenAdapter.width(20.0),),
                                     TextClickView(
-                                      title: "追加服务",
+                                      title: "修改服务",
                                       style: TextStyle(
                                           fontSize: ScreenAdapter.size(20),
                                           fontWeight: FontWeight.w500,
@@ -935,30 +703,20 @@ class _ServicePageState extends State<ServicePage> {
                                     fontSize: ScreenAdapter.size(26.0),
                                     color: Colors.amberAccent,
                                     fontWeight: FontWeight.w500
-                                )),
-                            TextSpan(
-                                text: "×${workOrderPondModel.number}",
-                                style: TextStyle(
-                                  fontSize: ScreenAdapter.size(18.0),
-                                  color: Colors.amberAccent,
-                                )
-                            )
+                                ))
                           ]
                       ),
                     ),
-                    title: Row(
-                      children: <Widget>[
-                        Container(
+                    title: Container(
                             alignment: Alignment.topLeft,
                             width: ScreenAdapter.getScreenWidth() * titleWdithRate,//避免超出手机屏幕，所以要给容易一个宽度，超出部分自动隐藏
                             child: Padding(
                               padding: const EdgeInsets.only(left: 0.0),
-                              child: Text('${workOrderPondModel.serviceName}', style: TextStyle(
+                              child: Text('客户序号：${workOrderPondModel.newWfJobNumber.substring(4,8)}${workOrderPondModel.newWfJobNumber.substring(workOrderPondModel.newWfJobNumber.length-4)}', style: TextStyle(
                                   fontSize: ScreenAdapter.size(26),
-                                  fontWeight: FontWeight.w300),maxLines:1,overflow: TextOverflow.ellipsis,),
-                            ))
-                      ],
-                    ),
+                                  color: Colors.blue,
+                                  fontWeight: FontWeight.w500),maxLines:1,overflow: TextOverflow.ellipsis,),
+                            )),
                     children: <Widget>[
                       Padding(
                         padding: EdgeInsets.fromLTRB(
@@ -966,42 +724,15 @@ class _ServicePageState extends State<ServicePage> {
                         child: Container(
                             alignment: Alignment.topLeft,
                             child: RichText(
-                                maxLines: 5,
+                                maxLines: 8,
                                 overflow: TextOverflow.ellipsis,
                                 text: TextSpan(
                                     children: [
                                       TextSpan(
-                                        text: '${workOrderPondModel.description}',
+                                        text: '用户问题描述：${workOrderPondModel.description}',
                                         style: TextStyle(
                                             fontSize: ScreenAdapter.size(24.0),
                                             color: Colors.black),
-                                      ),
-                                      TextSpan(
-                                          text: '删除',
-                                          style: TextStyle(
-                                              fontSize: ScreenAdapter.size(24.0),
-                                              color: Colors.blue
-                                          ),
-                                          recognizer: TapGestureRecognizer()
-                                            ..onTap = () {
-//                                            print(this._workOrderPondDataList);
-                                              if(workOrderPondModel.visibleComplete == false){
-                                                if(this._workOrderPondDataList[index]['orderItemDtoList'].length >1) {
-                                                  DialogPage.alertDialog(
-                                                      context, value['serviceName']).then((info){
-                                                    if(info == "OK"){
-                                                      _loadDeleteUsWOrderExeu(value['orderItemId']);
-                                                    }
-                                                  });
-                                                }
-                                              }else {
-                                                Fluttertoast.showToast(
-                                                  msg: '修改工单信息需要确认上门经用户同意方能修改',
-                                                  toastLength: Toast.LENGTH_SHORT,
-                                                  gravity: ToastGravity.CENTER,
-                                                );
-                                              }
-                                            }
                                       )
                                     ]
                                 )
@@ -1009,85 +740,13 @@ class _ServicePageState extends State<ServicePage> {
                         ),
                       ),
                       Column(
-                          children: _getmyOtherWorkOrderDetailsInfo(workOrderPondModel.orderItemDtoList, workOrderPondModel.description, workOrderPondModel.visibleComplete)
-                      ),
-                      Column(
                         children: <Widget>[
-                          Container(
-                            margin: EdgeInsets.only(top: ScreenAdapter.width(
-                                20.0)),
-                            child: Wrap(
-                                spacing: ScreenAdapter.width(46),
-                                children: _getMyImageUrlShow(workOrderPondModel.imageUrl)
-                            ),
-                          ),
+                          //加载图片的方法
+                          _loadWxUserUploadImages(listImages),
+                          //加载工单复合未通过原因的方法
                           getCheckfaillReason(workOrderPondModel.checkfaillReason),
-                          Padding(
-                            padding: EdgeInsets.fromLTRB(
-                                ScreenAdapter.width(28.0),
-                                ScreenAdapter.height(16.0),
-                                ScreenAdapter.width(16.0),
-                                ScreenAdapter.height(8.0)),
-                            child: Container(
-                              alignment: Alignment.topLeft,
-                              child: Text('用户姓名：${workOrderPondModel.username}',
-                                style: TextStyle(fontSize: ScreenAdapter.size(24.0)),),
-                            ),
-                          ),
-                          Padding(
-                            padding: EdgeInsets.fromLTRB(
-                                ScreenAdapter.width(28.0),
-                                ScreenAdapter.height(1.0),
-                                ScreenAdapter.width(16.0),
-                                ScreenAdapter.height(8.0)),
-                            child: Container(
-                              alignment: Alignment.topLeft,
-                              child: GestureDetector(
-                                child: Container(
-                                    child: SelectableText(
-                                      '联系方式：${workOrderPondModel.telphone}',
-                                      style: TextStyle(color: Colors.black87,fontSize: ScreenAdapter.size(24.0)),
-                                      scrollPhysics: ClampingScrollPhysics(),
-                                    )),
-                                onLongPress: () {
-
-                                },
-                              ),
-                            ),
-                          ),
-                          Padding(
-                            padding: EdgeInsets.fromLTRB(
-                                ScreenAdapter.width(28.0),
-                                ScreenAdapter.height(1.0),
-                                ScreenAdapter.width(16.0),
-                                ScreenAdapter.height(8.0)),
-                            child: Container(
-                              alignment: Alignment.topLeft,
-                              child: GestureDetector(
-                                child: Container(
-                                    child: SelectableText(
-                                      '用户地址：${workOrderPondModel.detailAddress}',
-                                      style: TextStyle(color: Colors.black87,fontSize: ScreenAdapter.size(24.0)),
-                                      scrollPhysics: ClampingScrollPhysics(),
-                                    )),
-                                onLongPress: () {
-
-                                },
-                              ),
-                            ),
-                          ),
-                          Padding(
-                            padding: EdgeInsets.fromLTRB(
-                                ScreenAdapter.width(28.0),
-                                ScreenAdapter.height(1.0),
-                                ScreenAdapter.width(16.0),
-                                ScreenAdapter.height(8.0)),
-                            child: Container(
-                                alignment: Alignment.topLeft,
-                                child: Text('预约时间：${formatDate(DateTime.parse(workOrderPondModel.appointUpTime),[yyyy, '-', mm, '-', dd, ' ', 'HH', ':', 'nn'])} - ${formatDate(DateTime.parse(workOrderPondModel.appointUpEndTime),['HH', ':', 'nn'])}',
-                                    style: TextStyle(fontSize: ScreenAdapter.size(24.0)))
-                            ),
-                          ),
+                          //加载工单通用内容部分
+                          universalWorkOrderAttributes(workOrderPondModel, Colors.black),
                           Offstage(
                               offstage: workOrderPondModel.visibleComplete,
                               child: Padding(
@@ -1095,24 +754,30 @@ class _ServicePageState extends State<ServicePage> {
                                     ScreenAdapter.width(15.0), ScreenAdapter.height(10.0), ScreenAdapter.width(0.0), ScreenAdapter.height(5.0)),
                                 child: Row(
                                   children: <Widget>[
-                                    Transform.rotate(
-                                      angle: math.pi / 4.0,
-                                      child: IconButton(
-                                        icon: ImageIcon(
-                                          AssetImage('images/2.0x/u5944.png'),
-                                          size: ScreenAdapter.size(30),),
-                                        onPressed: () {
-                                          Navigator.pushNamed(
-                                              context, '/appendService',arguments: {
-                                            "workOrderId":workOrderPondModel.workOrderId,
-                                            "orderId":workOrderPondModel.orderId,
-                                            "decorationId":userInfo["decorationId"]
-                                          });
-                                        },
+                                    Container(
+                                      width: ScreenAdapter.width(30.0),
+                                      child: Transform.rotate(
+                                        angle: math.pi / 180.0,
+                                        child: IconButton(
+                                          icon: Icon(
+                                            IconData(0xe60c,fontFamily: 'AntdIcons'),
+                                            size: ScreenAdapter.size(30.0),
+                                            color: Colors.black,
+                                          ),
+                                          onPressed: () {
+                                            Navigator.pushNamed(
+                                                context, '/appendService',arguments: {
+                                              "workOrderId":workOrderPondModel.workOrderId,
+                                              "orderId":workOrderPondModel.orderId,
+                                              "decorationId":userInfo["decorationId"]
+                                            });
+                                          },
+                                        ),
                                       ),
                                     ),
+                                    SizedBox(width: ScreenAdapter.width(20.0),),
                                     TextClickView(
-                                      title: "追加服务",
+                                      title: "修改服务",
                                       style: TextStyle(
                                           fontSize: ScreenAdapter.size(20),
                                           fontWeight: FontWeight.w500,
@@ -1219,114 +884,6 @@ class _ServicePageState extends State<ServicePage> {
             ),
           ),
         );
-      }
-    });
-    return list;
-  }
-
-  ///获取我的工单池其它服务信息
-  List<Widget> _getmyOtherWorkOrderDetailsInfo(List<OrderItemDtoList> orderItemDtoList, String description, bool visibleComplete) {
-    List<Widget> list = new List();
-    orderItemDtoList.asMap().forEach((index,value){
-      if(index>0){
-        list.add(Column(
-          children: <Widget>[
-            Row(
-              children: <Widget>[
-                Padding(
-                  padding: EdgeInsets.only(left: ScreenAdapter.width(
-                      24.0), top: ScreenAdapter.width(30.0)),
-                  child: Container(
-                      alignment: Alignment.topLeft,
-                      child: Padding(
-                        padding: const EdgeInsets.only(left: 0.0),
-                        child: Text('服务名称：${value.serviceName}', style: TextStyle(
-                            fontSize: ScreenAdapter.size(22.0),
-                            color: Colors.blue,
-                            fontWeight: FontWeight.w300),),
-                      )),
-                ),
-                Expanded(
-                  child: Container(
-                    alignment: Alignment.bottomRight,
-                    margin: EdgeInsets.only(
-                        right: ScreenAdapter.width(30.0),
-                        top: ScreenAdapter.height(28)),
-                    child: RichText(
-                      text: TextSpan(
-                          children: [
-                            TextSpan(
-                                text: "￥${value.serviceFee}",
-                                style: TextStyle(
-                                    fontSize: ScreenAdapter.size(26.0),
-                                    color: Colors.amberAccent,
-                                    fontWeight: FontWeight.w500
-                                )),
-                            TextSpan(
-                                text: "×${value.number}",
-                                style: TextStyle(
-                                  fontSize: ScreenAdapter.size(18.0),
-                                  color: Colors.amberAccent,
-                                )
-                            )
-                          ]
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            Padding(
-              padding: EdgeInsets.fromLTRB(
-                  ScreenAdapter.width(24.0),
-                  ScreenAdapter.width(32.0), 0.0, 0.0),
-              child: Container(
-                  alignment: Alignment.topLeft,
-                  child: RichText(
-                      maxLines: 5,
-                      overflow: TextOverflow.ellipsis,
-                      text: TextSpan(
-                          children: [
-                            TextSpan(
-                              text: '${description}',
-                              style: TextStyle(
-                                  fontSize: ScreenAdapter.size(24.0),
-                                  color: Colors.black),
-                            ),
-                            TextSpan(
-                                text: '删除',
-                                style: TextStyle(
-                                    fontSize: ScreenAdapter.size(
-                                        24.0),
-                                    color: Colors.blue
-                                ),
-                                recognizer: TapGestureRecognizer()
-                                  ..onTap = () {
-                                    if(visibleComplete == false){
-                                      if(orderItemDtoList.length >1) {
-                                          DialogPage.alertDialog(
-                                            context, value.serviceName).then((info){
-                                            if(info == "OK"){
-                                              _loadDeleteUsWOrderExeu(value.orderItemId);
-                                            }
-                                        });
-                                      }
-                                    }else {
-                                      Fluttertoast.showToast(
-                                        msg: '修改工单信息需要确认上门经用户同意方能修改',
-                                        toastLength: Toast.LENGTH_SHORT,
-                                        gravity: ToastGravity.CENTER,
-                                      );
-                                    }
-                                  }
-                            )
-                          ]
-                      )
-                  )
-              ),
-            ),
-          ],
-        ));
       }
     });
     return list;
@@ -1465,7 +1022,7 @@ class _ServicePageState extends State<ServicePage> {
             '工单复核未通过原因:${description}',
             // maxLines: 5,
             // overflow: TextOverflow.ellipsis,
-            style: TextStyle(fontSize: ScreenAdapter.size(24.0),color: Colors.red),
+            style: TextStyle(fontSize: ScreenAdapter.size(24.0),color: Colors.redAccent),
           ),
         ),
       );
@@ -1474,6 +1031,7 @@ class _ServicePageState extends State<ServicePage> {
     }
 
   }
+
 
 
 
@@ -1492,6 +1050,7 @@ class _ServicePageState extends State<ServicePage> {
                 children: <Widget>[
                   Expanded(
                     child: TabBar(
+                      controller: _tabController,
                       //设置指示器的颜色
                       indicatorColor: Colors.blue,
                       //设置选中时文字的颜色
@@ -1504,6 +1063,9 @@ class _ServicePageState extends State<ServicePage> {
                       onTap: (index){
                         setState(() {
                           this.currentIndex = index;
+                          _tabController = TabController(
+                              initialIndex: this.currentIndex, length: 2, vsync: this);
+                          _tabController.animateTo(this.currentIndex);
                         });
                       },
                     ),
@@ -1511,6 +1073,7 @@ class _ServicePageState extends State<ServicePage> {
                 ],
               )),
           body: TabBarView(
+            controller: _tabController,
             children: <Widget>[
               ListView(
                   children: _recWorkOrderListWidget()
@@ -1524,4 +1087,238 @@ class _ServicePageState extends State<ServicePage> {
   }
 
 
+
+  void onPageChanged(int index) {
+
+  }
+
+  /*我的订单中通用的订单详情列表*/
+  Widget universalWorkOrderAttributes(WorkOrderPondModel workOrderPondModel,Color definitionColor) {
+      return Column(
+        children: <Widget>[
+          //录入工单详细信息 START   代码后续可以提取成方法
+          Padding(
+            padding: EdgeInsets.fromLTRB(
+                ScreenAdapter.width(28.0), ScreenAdapter.height(0.0), ScreenAdapter.width(16.0), ScreenAdapter.height(4.0)),
+            child: Container(
+              alignment: Alignment.topLeft,
+              child: SelectableText('新工作流工单流水号：${workOrderPondModel.newWfJobNumber}',
+                  style: TextStyle(
+                      fontSize: ScreenAdapter.size(24.0),
+                      color: definitionColor),
+                  textAlign: TextAlign.right),
+            ),
+          ),
+          Padding(
+            padding: EdgeInsets.fromLTRB(
+                ScreenAdapter.width(28.0), ScreenAdapter.height(0.0), ScreenAdapter.width(16.0), ScreenAdapter.height(4.0)),
+            child: Container(
+              alignment: Alignment.topLeft,
+              child: SelectableText('客户序号：${workOrderPondModel.newWfJobNumber.substring(4,8)}${workOrderPondModel.newWfJobNumber.substring(workOrderPondModel.newWfJobNumber.length-4)}',
+                  style: TextStyle(
+                      fontSize: ScreenAdapter.size(24.0),
+                      fontWeight: FontWeight.w500,
+                      color: definitionColor),
+                  textAlign: TextAlign.right),
+            ),
+          ),
+          Padding(
+            padding: EdgeInsets.fromLTRB(
+                ScreenAdapter.width(28.0), ScreenAdapter.height(0.0), ScreenAdapter.width(16.0), ScreenAdapter.height(4.0)),
+            child: Container(
+              alignment: Alignment.topLeft,
+              child: SelectableText('客户姓名：${workOrderPondModel.username}',
+                  style: TextStyle(
+                      fontSize: ScreenAdapter.size(24.0),
+                      color: definitionColor),
+                  textAlign: TextAlign.right),
+            ),
+          ),
+          Padding(
+            padding: EdgeInsets.fromLTRB(
+                ScreenAdapter.width(28.0),
+                ScreenAdapter.height(0.0),
+                ScreenAdapter.width(16.0),
+                ScreenAdapter.height(4.0)),
+            child: Container(
+              alignment: Alignment.topLeft,
+              child: SelectableText('联系方式：${workOrderPondModel.telphone}',
+                style: TextStyle(fontSize: ScreenAdapter.size(24.0),color: definitionColor),),
+            ),
+          ),
+          Padding(
+            padding: EdgeInsets.fromLTRB(
+                ScreenAdapter.width(28.0),
+                ScreenAdapter.height(0.0),
+                ScreenAdapter.width(16.0),
+                ScreenAdapter.height(4.0)),
+            child: Container(
+              alignment: Alignment.topLeft,
+              child: SelectableText('客户区域：${workOrderPondModel.areaName}',
+                style: TextStyle(fontSize: ScreenAdapter.size(24.0),color: definitionColor),),
+            ),
+          ),
+          Padding(
+            padding: EdgeInsets.fromLTRB(
+                ScreenAdapter.width(28.0),
+                ScreenAdapter.height(1.0),
+                ScreenAdapter.width(16.0),
+                ScreenAdapter.height(4.0)),
+            child: Container(
+              alignment: Alignment.topLeft,
+              child: GestureDetector(
+                child: Container(
+                    child: SelectableText(
+                      '客户地址：${workOrderPondModel.detailAddress}',
+                      style: TextStyle(color: definitionColor,fontSize: ScreenAdapter.size(24.0)),
+                      scrollPhysics: ClampingScrollPhysics(),
+                    )),
+                onLongPress: () {
+
+                },
+              ),
+            ),
+          ),
+          Padding(
+            padding: EdgeInsets.fromLTRB(
+                ScreenAdapter.width(28.0),
+                ScreenAdapter.height(1.0),
+                ScreenAdapter.width(16.0),
+                ScreenAdapter.height(4.0)),
+            child: Container(
+              alignment: Alignment.topLeft,
+              child: GestureDetector(
+                child: Container(
+                    child: SelectableText(
+                      '上门时间：${formatDate(DateTime.parse(workOrderPondModel.appointUpTime),[yyyy, '-', mm, '-', dd])}',
+                      style: TextStyle(color: definitionColor,fontSize: ScreenAdapter.size(24.0)),
+                      scrollPhysics: ClampingScrollPhysics(),
+                    )),
+                onLongPress: () {
+
+                },
+              ),
+            ),
+          ),
+          Padding(
+            padding: EdgeInsets.fromLTRB(
+                ScreenAdapter.width(28.0),
+                ScreenAdapter.height(1.0),
+                ScreenAdapter.width(16.0),
+                ScreenAdapter.height(8.0)),
+            child: Container(
+                alignment: Alignment.topLeft,
+                child: SelectableText('服务内容：${workOrderPondModel.serviceName}',
+                    style: TextStyle(fontSize: ScreenAdapter.size(24.0),color: definitionColor))
+            ),
+          ),
+          Padding(
+            padding: EdgeInsets.fromLTRB(
+                ScreenAdapter.width(28.0),
+                ScreenAdapter.height(1.0),
+                ScreenAdapter.width(16.0),
+                ScreenAdapter.height(8.0)),
+            child: Container(
+                alignment: Alignment.topLeft,
+                child: SelectableText('服务费用：${workOrderPondModel.serviceFee}',
+                    style: TextStyle(fontSize: ScreenAdapter.size(24.0),color: definitionColor))
+            ),
+          ),
+          Padding(
+            padding: EdgeInsets.fromLTRB(
+                ScreenAdapter.width(28.0),
+                ScreenAdapter.height(1.0),
+                ScreenAdapter.width(16.0),
+                ScreenAdapter.height(8.0)),
+            child: Container(
+                alignment: Alignment.topLeft,
+                child: SelectableText('ITV帐号：${workOrderPondModel.itvAccount ?? ""}',
+                    style: TextStyle(fontSize: ScreenAdapter.size(24.0),color: definitionColor))
+            ),
+          ),
+          Padding(
+            padding: EdgeInsets.fromLTRB(
+                ScreenAdapter.width(28.0),
+                ScreenAdapter.height(1.0),
+                ScreenAdapter.width(16.0),
+                ScreenAdapter.height(8.0)),
+            child: Container(
+                alignment: Alignment.topLeft,
+                child: SelectableText('SN号码：${workOrderPondModel.snNumber ?? ""}',
+                    style: TextStyle(fontSize: ScreenAdapter.size(24.0),color: definitionColor))
+            ),
+          ),
+          Padding(
+            padding: EdgeInsets.fromLTRB(
+                ScreenAdapter.width(28.0),
+                ScreenAdapter.height(1.0),
+                ScreenAdapter.width(16.0),
+                ScreenAdapter.height(8.0)),
+            child: Container(
+                alignment: Alignment.topLeft,
+                child: SelectableText('宽带带宽：${workOrderPondModel.broadbandWidth ?? ""}',
+                    style: TextStyle(fontSize: ScreenAdapter.size(24.0),color: definitionColor))
+            ),
+          ),
+          Padding(
+            padding: EdgeInsets.fromLTRB(
+                ScreenAdapter.width(28.0),
+                ScreenAdapter.height(1.0),
+                ScreenAdapter.width(16.0),
+                ScreenAdapter.height(8.0)),
+            child: Container(
+                alignment: Alignment.topLeft,
+                child: SelectableText('派单工号：${workOrderPondModel.assignAccount ?? ""}',
+                    style: TextStyle(fontSize: ScreenAdapter.size(24.0),color: definitionColor))
+            ),
+          ),
+          //录入工单详细信息 END   代码后续可以提取成方法
+        ],
+      );
+  }
+
+  /*加载微信端小程序上传的图片*/
+  Widget _loadWxUserUploadImages(List<String> listImages) {
+      if(listImages.length > 0 ) {
+        return Container(
+          padding: EdgeInsets.fromLTRB(ScreenAdapter.width(52), ScreenAdapter.width(26), ScreenAdapter.width(52), ScreenAdapter.width(26)),
+          child: GridView.builder(
+            shrinkWrap: true, //解决 listview 嵌套报错
+            physics: NeverScrollableScrollPhysics(), //禁用滑动事件
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              //横轴元素个数
+                crossAxisCount: 2,
+                //纵轴间距
+                mainAxisSpacing: ScreenAdapter.width(18),
+                //横轴间距
+                crossAxisSpacing: ScreenAdapter.height(18),
+                //子组件宽高长度比例
+                childAspectRatio: 1),
+            itemBuilder: (BuildContext context, int index) {
+              return GestureDetector(
+                onTap: () {
+                  //点击图片的时候跳转道图片放大页面
+                  Navigator.pushNamed(context,"/photoGallery",arguments: {
+                    "index": index,
+                    "galleryItems": listImages
+                  });
+                },
+                child: Image.network(
+                  listImages[index],
+                  fit: BoxFit.cover,
+                ),
+              );
+            },
+            itemCount: listImages.length,
+          ),
+        );
+      } else {
+        return Container(
+          child: Text(""),
+        );
+      }
+  }
+
+  @override
+  bool get wantKeepAlive => true;
 }

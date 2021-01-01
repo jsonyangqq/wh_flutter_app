@@ -1,6 +1,8 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'routes/Routes.dart';
 import 'package:jpush_flutter/jpush_flutter.dart';
 import 'utils/Storage.dart';
@@ -80,14 +82,35 @@ class _MyAppState extends State<MyApp> {
     if(loginState == 0){
       return MaterialApp(
         debugShowCheckedModeBanner: false,
+        locale: Locale('zh', 'CH'),
         initialRoute: '/login',
         onGenerateRoute: onGenerateRoute,
+          localizationsDelegates: [
+            GlobalCupertinoLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+          ],
+        supportedLocales: [
+          const Locale('zh', 'CH'),
+          const Locale('en', 'US'),
+        ],
       );
     }else{
       return MaterialApp(
         debugShowCheckedModeBanner: false,
+        theme: ThemeData(primaryColor: Color.fromRGBO(46, 153, 240, 1)),
+        locale: Locale('zh', 'CH'),
         initialRoute: '/tab',
         onGenerateRoute: onGenerateRoute,
+        localizationsDelegates: [
+          GlobalCupertinoLocalizations.delegate,
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+        ],
+        supportedLocales: [
+          const Locale('zh', 'CH'),
+          const Locale('en', 'US'),
+        ],
       );
     }
 

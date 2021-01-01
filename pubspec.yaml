@@ -19,13 +19,15 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  flutter_localizations:
+    sdk: flutter
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^0.1.2
   flutter_screenutil: ^0.6.0
   image_picker: ^0.6.1+10
-  dio: ^3.0.4
+  dio: ^3.0.10
   shared_preferences: ^0.5.4+5
   event_bus: ^1.1.0
   jaguar: ^2.2.1
@@ -37,6 +39,9 @@ dependencies:
   jpush_flutter: ^0.1.0
   webview_flutter: ^0.3.19+9
   path_provider: ^0.5.0
+  photo_view: ^0.10.3
+  flutter_cupertino_localizations: ^1.0.1
+  syncfusion_flutter_datepicker: ^18.4.31-beta
 
 dev_dependencies:
    flutter_test:
@@ -70,6 +75,7 @@ flutter:
     - images/5.png
     - images/6.png
     - images/7.png
+    - images/Date_range_picker.png
     - images/2.0x/shili.png
     - images/3.0x/shili.png
     - images/4.0x/shili.png
@@ -101,6 +107,7 @@ flutter:
     - images/2.0x/5.png
     - images/2.0x/6.png
     - images/2.0x/7.png
+    - images/2.0x/Date_range_picker.png
     - images/3.0x/1.png
     - images/3.0x/2.png
     - images/3.0x/3.png
@@ -108,6 +115,7 @@ flutter:
     - images/3.0x/5.png
     - images/3.0x/6.png
     - images/3.0x/7.png
+    - images/3.0x/Date_range_picker.png
     - images/4.0x/1.png
     - images/4.0x/2.png
     - images/4.0x/3.png
@@ -115,6 +123,7 @@ flutter:
     - images/4.0x/5.png
     - images/4.0x/6.png
     - images/4.0x/7.png
+    - images/4.0x/Date_range_picker.png
 
 
   # To add assets to your application, add an assets section, like this:
@@ -147,3 +156,11 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/custom-fonts/#from-packages
+
+  fonts:
+    - family: AntdIcons
+      fonts:
+        - asset: assets/fonts/AntdIcons.ttf
+    - family: AntDelIcons
+      fonts:
+        - asset: assets/fonts/AntDelIcons.ttf

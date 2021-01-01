@@ -11,6 +11,7 @@ import 'package:wh_flutter_app/utils/DialogPage.dart';
 import 'package:wh_flutter_app/utils/ScreenAdapter.dart';
 import 'package:wh_flutter_app/utils/Storage.dart';
 import 'package:wh_flutter_app/utils/TextClickView.dart';
+import 'package:photo_view/photo_view.dart';
 
 /*已完成 确认服务页面*/
 
@@ -25,11 +26,14 @@ class ComfirmServicePage extends StatefulWidget {
 
 class _ComfirmServicePageState extends State<ComfirmServicePage> {
 
-  File _image;
+  PickedFile _image;
   String _imageUrlAddress='';
   int workOrderId;
   var selectFileUrlController = new TextEditingController();
   Map<String,dynamic> userInfo = Map();
+  bool isDecorationImgShow = true;
+
+  final ImagePicker _picker = ImagePicker();
 
 
   @override
@@ -48,7 +52,7 @@ class _ComfirmServicePageState extends State<ComfirmServicePage> {
     });
   }
 
-  _modelBottomSheet() async{
+  Future<void> _modelBottomSheet() async{
     var result=await showModalBottomSheet(
         context:context,
         builder: (context){
@@ -76,17 +80,28 @@ class _ComfirmServicePageState extends State<ComfirmServicePage> {
 
   /*拍照*/
   _takePhoto() async {
-    var image = await ImagePicker.pickImage(source: ImageSource.camera);
+    var image = await _picker.getImage(source: ImageSource.camera);
+
+    if(null == image) {
+      Fluttertoast.showToast(
+        msg: '请先选择要进行上传的图片',
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.CENTER,
+      );
+    } else {
+      Fluttertoast.showToast(
+        msg: '上传图片成功',
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.CENTER,
+      );
+    }
 
     setState(() {
-      this._image = image;
+      if(image != null) {
+        this._image = image;
+        this.isDecorationImgShow = false;
+      }
     });
-
-    Fluttertoast.showToast(
-      msg: '上传图片成功',
-      toastLength: Toast.LENGTH_SHORT,
-      gravity: ToastGravity.CENTER,
-    );
 
     Navigator.pop(context);
 
@@ -95,23 +110,35 @@ class _ComfirmServicePageState extends State<ComfirmServicePage> {
   /*相册*/
   _openGallery() async {
     var image =
-    await ImagePicker.pickImage(source: ImageSource.gallery);
+    await _picker.getImage(source: ImageSource.gallery);
+
+    if(null == image) {
+      Fluttertoast.showToast(
+        msg: '请先选择要进行上传的图片',
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.CENTER,
+      );
+    }else {
+      Fluttertoast.showToast(
+        msg: '上传图片成功',
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.CENTER,
+      );
+    }
 
     setState(() {
-      this._image = image;
+      if(image != null) {
+        this._image = image;
+        this.isDecorationImgShow = false;
+        loadImageResource(userInfo);
+      }
     });
-
-    Fluttertoast.showToast(
-      msg: '上传图片成功',
-      toastLength: Toast.LENGTH_SHORT,
-      gravity: ToastGravity.CENTER,
-    );
 
     Navigator.pop(context);
   }
 
   //上传图片到服务器
-  _uploadImage(File _imageDir) async {
+  _uploadImage(PickedFile _imageDir) async {
 
     //注意：dio3.x版本为了兼容web做了一些修改，上传图片的时候需要把File类型转换成String类型，具体代码如下
     if(_imageDir == null){
@@ -218,13 +245,8 @@ class _ComfirmServicePageState extends State<ComfirmServicePage> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
-                  Expanded(
-                    flex: 6,
-                    child: Container(
-                      alignment: Alignment.center,
-                      child: Image.network('${this.userInfo["spare1"]}',width: ScreenAdapter.width(700.0),height: ScreenAdapter.height(750.0),fit: BoxFit.fill,),
-                    ),
-                  ),
+                  //加载用户上传图片或者是师傅收钱吧二维码，二者只会出现一个
+                  loadImageResource(userInfo),
                   Expanded(
                     flex: 2,
                     child: Padding(
@@ -272,5 +294,64 @@ class _ComfirmServicePageState extends State<ComfirmServicePage> {
         ],
       ),
     );
+  }
+
+
+
+
+  /*加载图片区域 不是展示师傅收钱吧二维码就是展示用户上传的图片*/
+  loadImageResource(Map<String, dynamic> userInfo){
+    List<String> listImages = new List<String>();
+    if(this._image != null) {
+      listImages.add(this._image.path);
+    }
+      return isDecorationImgShow ?
+       Expanded(
+        flex: 6,
+        child: Container(
+          alignment: Alignment.center,
+          child: Image.network('${this.userInfo["spare1"]}',width: ScreenAdapter.width(700.0),height: ScreenAdapter.height(750.0),fit: BoxFit.fill,),
+        ),
+      ) :
+      Expanded(
+        flex: 6,
+        child: Stack(
+          children: <Widget>[
+            Positioned(
+              child:  Container(
+                  alignment: Alignment.center,
+                  child: GestureDetector(
+                    onTap: () {
+                      //点击图片的时候跳转道图片放大页面
+                      Navigator.pushNamed(context,"/photoAssetGallery",arguments: {
+                        "index": 0,
+                        "galleryItems": listImages,
+                      });
+                    },
+                    child: Image.file(new File(this._image.path),fit: BoxFit.cover,),
+                  )
+              ),
+            ),
+            Positioned(
+              right: ScreenAdapter.width(-14.0),
+              top: ScreenAdapter.height(-20.0),
+              child: IconButton(
+                icon: Icon(
+                  IconData(0xe725,fontFamily: 'AntDelIcons'),
+                  size: ScreenAdapter.size(50.0),
+                  color: Colors.redAccent,
+                ),
+                onPressed: () {
+                  //删除当前选中的图片
+                  setState(() {
+                    this._image = null;
+                    this.isDecorationImgShow = true;
+                  });
+                },
+              ),
+            )
+          ],
+        ),
+      );
   }
 }
