@@ -226,27 +226,28 @@ class _HomePageState extends State<HomePage> {
                                   )
                                 ],
                               ),
-                              Container(
-                                margin: EdgeInsets.only(left: ScreenAdapter.width(128), bottom: ScreenAdapter.height(48)),
-                                child: Stack(
-                                  alignment: Alignment.center,
-                                  children: <Widget>[
-                                    Align(
-                                      alignment: Alignment.topCenter,
-                                      child: Container(
-                                        child: Row(
-                                          children: <Widget>[
-                                            Text('排名：',
-                                                style: TextStyle(
-                                                    color: Colors.white, fontSize: ScreenAdapter.size(27.0))),
-                                            Text('${this._remunerationData.totalRank}',
-                                                style: TextStyle(
-                                                    color: Colors.yellow, fontSize: ScreenAdapter.size(27.0)))
-                                          ],
+                              Expanded(
+                                child: Container(
+                                margin: EdgeInsets.only(left: ScreenAdapter.width(80), bottom: ScreenAdapter.height(48)),
+                                  child: Stack(
+                                    alignment: Alignment.center,
+                                    children: <Widget>[
+                                      Positioned(
+                                        child: Container(
+                                          child: Row(
+                                            children: <Widget>[
+                                              Text('排名：',
+                                                  style: TextStyle(
+                                                      color: Colors.white, fontSize: ScreenAdapter.size(27.0))),
+                                              Text('${this._remunerationData.totalRank}',
+                                                  style: TextStyle(
+                                                      color: Colors.yellow, fontSize: ScreenAdapter.size(27.0)))
+                                            ],
+                                          ),
                                         ),
-                                      ),
-                                    )
-                                  ],
+                                      )
+                                    ],
+                                  ),
                                 ),
                               )
                             ],

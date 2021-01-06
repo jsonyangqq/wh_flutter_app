@@ -35,6 +35,8 @@ class _UnComfirmServicePageState extends State<UnComfirmServicePage> {
 
   final ImagePicker _picker = ImagePicker();
 
+  bool isLoading = false;
+
   TextEditingController _editingController = new TextEditingController();
 
   @override
@@ -202,8 +204,14 @@ class _UnComfirmServicePageState extends State<UnComfirmServicePage> {
       "description": this.descrptionReason,
       "file":  _imageDir == null ? null : await MultipartFile.fromFile(fileDir, filename: fileName)
     });
+    setState(() {
+      isLoading = true;
+    });
     var api = Config.domain + "/mobile/workOrderService/getUnableCompleteChgBack";
     var response = await Dio().post(api, data: formData);
+    setState(() {
+      isLoading = false;
+    });
     print(response);
     if(response.data['ret']==true){
       String msg = '退单服务已申请成功';
@@ -228,7 +236,32 @@ class _UnComfirmServicePageState extends State<UnComfirmServicePage> {
       appBar: AppBar(
         title: Text('服务确认'),
       ),
-    body: Column(
+    body: isLoading ?
+    Center(
+      child: Padding(
+        padding: EdgeInsets.all(1.0),
+        child: Container(
+          width: double.infinity,
+          color: Color.fromRGBO(255, 255, 255, 0.6 ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: <Widget>[
+              CircularProgressIndicator(
+                  strokeWidth: 2.0
+              ),
+              SizedBox(height: ScreenAdapter.height(20.0),),
+              Text(
+                '提交中，请稍后...',
+                style: TextStyle(fontSize: 16.0),
+              )
+            ],
+          ),
+        ),
+      ),
+    )
+        :
+    Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         Padding(

@@ -35,6 +35,8 @@ class _ComfirmServicePageState extends State<ComfirmServicePage> {
 
   final ImagePicker _picker = ImagePicker();
 
+  bool isLoading = false;
+
 
   @override
   void initState() {
@@ -161,8 +163,14 @@ class _ComfirmServicePageState extends State<ComfirmServicePage> {
     });
     var api = Config.domain + "/mobile/workOrderService/imguploadComplateWorder";
 //    Options options = Options(headers: {HttpHeaders.contentTypeHeader:"multipart/form-data"});
+    setState(() {
+      isLoading = true;
+    });
     var response = await Dio().post(api, data: formData);
     print(response);
+    setState(() {
+      isLoading = false;
+    });
     if(response.data['ret']==true){
       String msg = '确认服务完成';
       String msg2 = "并得到用户认可";
@@ -184,7 +192,32 @@ class _ComfirmServicePageState extends State<ComfirmServicePage> {
       appBar: AppBar(
         title: Text('服务确认'),
       ),
-      body: Column(
+      body: isLoading ?
+      Center(
+        child: Padding(
+          padding: EdgeInsets.all(1.0),
+          child: Container(
+            width: double.infinity,
+            color: Color.fromRGBO(255, 255, 255, 0.6 ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: <Widget>[
+                CircularProgressIndicator(
+                    strokeWidth: 2.0
+                ),
+                SizedBox(height: ScreenAdapter.height(20.0),),
+                Text(
+                  '提交中，请稍后...',
+                  style: TextStyle(fontSize: 16.0),
+                )
+              ],
+            ),
+          ),
+        ),
+      )
+          :
+      Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           Padding(
@@ -282,7 +315,7 @@ class _ComfirmServicePageState extends State<ComfirmServicePage> {
                                 this._uploadImage(this._image);
                               },
                             ),
-                          )
+                          ),
                         ],
                       ),
                     ),

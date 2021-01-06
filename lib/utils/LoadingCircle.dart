@@ -6,7 +6,7 @@ class LoadingCircle {
     /**
      * 加载更多时显示的组件,给用户提示  显示圈圈
      */
-    static Widget _getMoreWidget() {
+     Widget getMoreWidget(double progressValue) {
         return Center(
           child: Padding(
             padding: EdgeInsets.all(10.0),
@@ -19,6 +19,7 @@ class LoadingCircle {
                   style: TextStyle(fontSize: 16.0),
                 ),
                 CircularProgressIndicator(
+                  value: progressValue,
                   strokeWidth: 1.0,
                 )
               ],
